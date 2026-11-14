@@ -26,6 +26,7 @@ except ImportError:
     class SweFallback:
         SIDM_LAHIRI = 1
         FLG_SWIEPH = 2
+        FLG_MOSEPH = 4
         FLG_SIDEREAL = 64 * 1024
         FLG_SPEED = 256
         SUN = 0
@@ -36,6 +37,7 @@ except ImportError:
         VENUS = 3
         SATURN = 6
         MEAN_NODE = 10
+        TRUE_NODE = 11
 
         def set_sid_mode(self, *args, **kwargs):
             pass
@@ -58,9 +60,17 @@ except ImportError:
             asc = (lst + 90.0) % 360.0
             return None, [asc, 0, 0]
 
+        def houses_ex(self, jd, lat, lon, hsys=b'P', flags=0):
+            t = (jd - 2451545.0) / 36525.0
+            theta0 = (280.46061837 + 360.98564736629 * (jd - 2451545.0)) % 360.0
+            lst = (theta0 + lon) % 360.0
+            ayanamsa = self.get_ayanamsa_ut(jd)
+            asc = (lst + 90.0 - ayanamsa) % 360.0
+            return None, [asc, 0, 0]
+
         def calc_ut(self, jd, pid, flags=0):
-            speeds = {0: 360.0 / 365.25, 1: 360.0 / 27.32, 2: 360.0 / 87.97, 3: 360.0 / 224.7, 4: 360.0 / 686.98, 5: 360.0 / 4332.59, 6: 360.0 / 10759.22, 10: -360.0 / 6793.5}
-            base_deg = {0: 280.46, 1: 218.32, 2: 252.25, 3: 181.98, 4: 355.43, 5: 34.35, 6: 50.08, 10: 125.04}
+            speeds = {0: 360.0 / 365.25, 1: 360.0 / 27.32, 2: 360.0 / 87.97, 3: 360.0 / 224.7, 4: 360.0 / 686.98, 5: 360.0 / 4332.59, 6: 360.0 / 10759.22, 10: -360.0 / 6793.5, 11: -360.0 / 6793.5}
+            base_deg = {0: 280.46, 1: 218.32, 2: 252.25, 3: 181.98, 4: 355.43, 5: 34.35, 6: 50.08, 10: 125.04, 11: 125.04}
             spd = speeds.get(pid, 1.0)
             deg = (base_deg.get(pid, 0.0) + spd * (jd - 2451545.0)) % 360.0
             return [deg, 0, 0, spd], 0
@@ -367,28 +377,58 @@ def compute_varga_sign(abs_deg: float, varga_num: int) -> int:
     return res_idx + 1
 
 def calculate_sidereal_snapshot(utc_dt: datetime, lat: float, lon: float) -> dict:
+    """
+    Computes exact Sidereal Ascendant (Lagna) and 9 Vedic Grahas using Lahiri Ayanamsa
+    with built-in Moshier Ephemeris (FLG_MOSEPH) so zero external .se1 files are needed on Vercel.
+    """
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     hour_float = utc_dt.hour + (utc_dt.minute / 60.0) + (utc_dt.second / 3600.0)
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, hour_float)
-    flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
-    ayanamsa = swe.get_ayanamsa_ut(jd_ut)
-    _, ascmc = swe.houses(jd_ut, lat, lon, b'P')
-    asc_abs_deg = (ascmc[0] - ayanamsa) % 360.0
+
+    # Use FLG_MOSEPH + FLG_SIDEREAL so planetary longitudes never zero out on serverless hosts
+    calc_flags = swe.FLG_MOSEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
+
+    # Compute exact Sidereal Ascendant directly via houses_ex
+    try:
+        houses_out = swe.houses_ex(jd_ut, lat, lon, b'P', swe.FLG_SIDEREAL | swe.FLG_MOSEPH)
+        ascmc = houses_out[1] if isinstance(houses_out, tuple) and len(houses_out) == 2 else houses_out[0][1]
+        asc_abs_deg = float(ascmc[0]) % 360.0
+    except Exception:
+        ayanamsa = float(swe.get_ayanamsa_ut(jd_ut))
+        _, ascmc = swe.houses(jd_ut, lat, lon, b'P')
+        asc_abs_deg = (float(ascmc[0]) - ayanamsa) % 360.0
+
     asc_sign = int(asc_abs_deg // 30.0) + 1
 
+    planet_ids = {
+        "Sun": swe.SUN,
+        "Moon": swe.MOON,
+        "Mars": swe.MARS,
+        "Mercury": swe.MERCURY,
+        "Jupiter": swe.JUPITER,
+        "Venus": swe.VENUS,
+        "Saturn": swe.SATURN,
+        "Rahu": swe.TRUE_NODE
+    }
+
     raw_planets = {}
-    for pname, pid in SWE_PLANETS.items():
-        calc_out = swe.calc_ut(jd_ut, pid, flags)
-        # pysweph returns ((lon, lat, dist, speed, ...),), whereas pyswisseph returns ((lon, ...), flag)
+    for pname, pid in planet_ids.items():
+        calc_out = swe.calc_ut(jd_ut, pid, calc_flags)
         coords = calc_out[0] if isinstance(calc_out[0], (tuple, list)) else calc_out
         lon_deg = float(coords[0]) % 360.0
         speed = float(coords[3])
         is_retro = (speed < 0) if pname != "Rahu" else True
         raw_planets[pname] = {"abs_deg": lon_deg, "is_retro": is_retro}
 
+    # Ketu is exact 180 degrees opposite Rahu
     ketu_deg = (raw_planets["Rahu"]["abs_deg"] + 180.0) % 360.0
     raw_planets["Ketu"] = {"abs_deg": ketu_deg, "is_retro": True}
 
-    return {"asc_abs_deg": asc_abs_deg, "asc_sign": asc_sign, "raw_planets": raw_planets}
+    return {
+        "asc_abs_deg": asc_abs_deg,
+        "asc_sign": asc_sign,
+        "raw_planets": raw_planets
+    }
 
 def evaluate_planet_dignity(pname: str, sign_num: int, is_combust: bool, is_vargottama: bool, is_retro: bool):
     reasons = []
