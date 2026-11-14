@@ -377,9 +377,11 @@ def calculate_sidereal_snapshot(utc_dt: datetime, lat: float, lon: float) -> dic
 
     raw_planets = {}
     for pname, pid in SWE_PLANETS.items():
-        res, _ = swe.calc_ut(jd_ut, pid, flags)
-        lon_deg = float(res[0]) % 360.0
-        speed = float(res[3])
+        calc_out = swe.calc_ut(jd_ut, pid, flags)
+        # pysweph returns ((lon, lat, dist, speed, ...),), whereas pyswisseph returns ((lon, ...), flag)
+        coords = calc_out[0] if isinstance(calc_out[0], (tuple, list)) else calc_out
+        lon_deg = float(coords[0]) % 360.0
+        speed = float(coords[3])
         is_retro = (speed < 0) if pname != "Rahu" else True
         raw_planets[pname] = {"abs_deg": lon_deg, "is_retro": is_retro}
 
