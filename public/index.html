@@ -556,6 +556,14 @@
           <input type="text" id="pincodeInput" placeholder="e.g., 800001 or 10001" />
         </div>
         <div class="field-group">
+          <label>Ayanamsa System</label>
+          <select id="ayanamsaSelect">
+            <option value="lahiri" selected>Lahiri (Chitrapaksha)</option>
+            <option value="raman">B.V. Raman</option>
+            <option value="kp">Krishnamurti (KP)</option>
+          </select>
+        </div>
+        <div class="field-group">
           <button type="submit" id="submitBtn">Generate Kundali</button>
         </div>
       </div>
@@ -1137,7 +1145,8 @@
         country_code: countryOpt ? countryOpt.dataset.code : "",
         state: document.getElementById("stateSelect").value,
         city: document.getElementById("cityInput").value,
-        pincode: document.getElementById("pincodeInput").value
+        pincode: document.getElementById("pincodeInput").value,
+        ayanamsa: document.getElementById("ayanamsaSelect").value
       };
 
       try {
@@ -1159,7 +1168,7 @@
           <div class="profile-item"><strong>Native &amp; Birth</strong>${data.profile.name} (${data.profile.dob} at ${data.profile.tob})</div>
           <div class="profile-item"><strong>Location &amp; Coordinates</strong>${data.profile.place}<br/><small>${data.profile.coords}</small></div>
           <div class="profile-item"><strong>Ascendant &amp; Moon Sign</strong>Lagna: ${data.profile.ascendant}<br/>Moon: ${data.profile.moon_sign}</div>
-          <div class="profile-item"><strong>Running Dasha (MD–SD)</strong>${data.profile.running_dasha}</div>
+          <div class="profile-item"><strong>Running Dasha &amp; Ayanamsa</strong>${data.profile.running_dasha}<br/><small>Ayanamsa: ${data.profile.ayanamsa || "Lahiri"}</small></div>
         `;
 
         document.getElementById("chart-D1").innerHTML = renderNorthIndianSVG(data.charts.D1, "D1");
@@ -1167,10 +1176,22 @@
 
         document.getElementById("planetTableBody").innerHTML = data.planet_table.map(p => {
           let badges = "";
+          if (p.is_ascendant) badges += `<span class="badge" style="background:#fef3c7; color:#b45309;">Lagna</span>`;
           if (p.is_retrograde) badges += `<span class="badge b-retro">* Retrograde</span>`;
           if (p.is_combust) badges += `<span class="badge b-combust">^ Combust</span>`;
           if (p.is_vargottama) badges += `<span class="badge b-varg"># Vargottama</span>`;
-          return `<tr><td><strong>${p.planet}</strong> (${p.short})</td><td>${p.sign_name} ${p.degree}°</td><td>${p.nakshatra} [#${p.nakshatra_num}]</td><td>House ${p.house}</td><td>${p.house_lord}</td><td>${p.nakshatra_lord}</td><td>${badges || "Normal"}</td></tr>`;
+          const rowStyle = p.is_ascendant ? 'style="background:#fff8ee; font-weight:600;"' : "";
+          return `
+            <tr ${rowStyle}>
+              <td><strong>${p.planet}</strong> (${p.short})</td>
+              <td>${p.sign_name} ${p.degree}°</td>
+              <td>${p.nakshatra} [#${p.nakshatra_num}]</td>
+              <td>House ${p.house}</td>
+              <td>${p.house_lord}</td>
+              <td>${p.nakshatra_lord}</td>
+              <td>${badges || "Normal"}</td>
+            </tr>
+          `;
         }).join("");
 
         const tabsDiv = document.getElementById("vargaTabs");

@@ -221,6 +221,13 @@ HUMAN_ARCHETYPES = {
     }
 }
 
+# --- AYANAMSA MODES ---
+AYANAMSA_MODES = {
+    "lahiri": (getattr(swe, "SIDM_LAHIRI", 1), "Lahiri (Chitrapaksha)"),
+    "raman": (getattr(swe, "SIDM_BV_RAMAN", 3), "B.V. Raman"),
+    "kp": (getattr(swe, "SIDM_KRISHNAMURTI", 5), "Krishnamurti (KP)")
+}
+
 # --- REQUEST MODELS ---
 class BirthInput(BaseModel):
     name: str
@@ -231,6 +238,7 @@ class BirthInput(BaseModel):
     state: str
     city: str
     pincode: Optional[str] = ""
+    ayanamsa: Optional[str] = "lahiri"
 
 class DashaExpandRequest(BaseModel):
     parent_lord: str
@@ -376,12 +384,13 @@ def compute_varga_sign(abs_deg: float, varga_num: int) -> int:
 
     return res_idx + 1
 
-def calculate_sidereal_snapshot(utc_dt: datetime, lat: float, lon: float) -> dict:
+def calculate_sidereal_snapshot(utc_dt: datetime, lat: float, lon: float, ayanamsa_key: str = "lahiri") -> dict:
     """
-    Computes exact Sidereal Ascendant (Lagna) and 9 Vedic Grahas using Lahiri Ayanamsa
+    Computes exact Sidereal Ascendant (Lagna) and 9 Vedic Grahas using selected Ayanamsa
     with built-in Moshier Ephemeris (FLG_MOSEPH) so zero external .se1 files are needed on Vercel.
     """
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    sid_mode, _ = AYANAMSA_MODES.get(ayanamsa_key.lower(), AYANAMSA_MODES["lahiri"])
+    swe.set_sid_mode(sid_mode, 0, 0)
     hour_float = utc_dt.hour + (utc_dt.minute / 60.0) + (utc_dt.second / 3600.0)
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, hour_float)
 
@@ -879,7 +888,10 @@ def generate_kundali(data: BirthInput):
         local_dt = local_tz.localize(naive_dt)
         utc_dt = local_dt.astimezone(pytz.utc)
 
-        natal_snap = calculate_sidereal_snapshot(utc_dt, lat, lon)
+        ayanamsa_key = (data.ayanamsa or "lahiri").lower()
+        _, ayanamsa_label = AYANAMSA_MODES.get(ayanamsa_key, AYANAMSA_MODES["lahiri"])
+
+        natal_snap = calculate_sidereal_snapshot(utc_dt, lat, lon, ayanamsa_key)
         moon_abs_deg = natal_snap["raw_planets"]["Moon"]["abs_deg"]
         natal_moon_sign = int(moon_abs_deg // 30.0) + 1
         _, moon_nak_name, _, moon_pada = get_nakshatra_info(moon_abs_deg)
@@ -891,7 +903,7 @@ def generate_kundali(data: BirthInput):
 
         # Live Transit Reference (New Delhi)
         now_utc = datetime.now(pytz.utc)
-        delhi_snap = calculate_sidereal_snapshot(now_utc, 28.6139, 77.2090)
+        delhi_snap = calculate_sidereal_snapshot(now_utc, 28.6139, 77.2090, ayanamsa_key)
         transit_signs = {p: int(info["abs_deg"] // 30.0) + 1 for p, info in delhi_snap["raw_planets"].items()}
         d9_signs = {p: compute_varga_sign(info["abs_deg"], 9) for p, info in natal_snap["raw_planets"].items()}
 
@@ -908,6 +920,29 @@ def generate_kundali(data: BirthInput):
                 d1_planet_table = v_planets
 
         d1_asc_sign = natal_snap["asc_sign"]
+        asc_abs_deg = natal_snap["asc_abs_deg"]
+        asc_deg_in_sign = round(asc_abs_deg % 30.0, 2)
+        asc_nak_num, asc_nak_name, asc_nak_lord, asc_pada = get_nakshatra_info(asc_abs_deg)
+
+        asc_row = {
+            "planet": "Ascendant (Lagna)",
+            "short": "Asc",
+            "degree": asc_deg_in_sign,
+            "abs_degree": round(asc_abs_deg, 4),
+            "sign_num": d1_asc_sign,
+            "sign_name": ZODIAC_SIGNS[d1_asc_sign - 1],
+            "house": 1,
+            "house_lord": SIGN_LORDS[d1_asc_sign],
+            "nakshatra_num": asc_nak_num,
+            "nakshatra": f"{asc_nak_name} (P{asc_pada})",
+            "nakshatra_lord": asc_nak_lord,
+            "is_retrograde": False,
+            "is_combust": False,
+            "is_vargottama": (d1_asc_sign == compute_varga_sign(asc_abs_deg, 9)),
+            "is_ascendant": True
+        }
+        d1_planet_table_with_asc = [asc_row] + d1_planet_table
+
         planet_classifications = build_planetary_classification(d1_asc_sign, d1_planet_table, active_dasha_4)
 
         delhi_transit_chart, delhi_transit_table, delhi_transit_insights = build_varga_chart_and_insights(
@@ -937,17 +972,19 @@ def generate_kundali(data: BirthInput):
                 "timezone": tz_name,
                 "ascendant": f"{ZODIAC_SIGNS[d1_asc_sign - 1]} (Lord: {SIGN_LORDS[d1_asc_sign]})",
                 "moon_sign": f"{ZODIAC_SIGNS[natal_moon_sign - 1]} (Lord: {SIGN_LORDS[natal_moon_sign]}) — {moon_nak_name} P{moon_pada}",
-                "running_dasha": f"{active_dasha_4[0]} MD / {active_dasha_4[1]} AD / {active_dasha_4[2]} PD / {active_dasha_4[3]} SD"
+                "running_dasha": f"{active_dasha_4[0]} MD / {active_dasha_4[1]} AD / {active_dasha_4[2]} PD / {active_dasha_4[3]} SD",
+                "ayanamsa": ayanamsa_label
             },
             "natal_meta": {
                 "d1_asc_sign": d1_asc_sign,
                 "natal_moon_sign": natal_moon_sign,
                 "d9_signs": d9_signs,
-                "active_dasha_4": active_dasha_4
+                "active_dasha_4": active_dasha_4,
+                "ayanamsa": ayanamsa_key
             },
             "charts": all_vargas,
             "chart_insights": all_chart_insights,
-            "planet_table": d1_planet_table,
+            "planet_table": d1_planet_table_with_asc,
             "planet_classifications": planet_classifications,
             "transit": {
                 "timestamp": now_ist.strftime("%Y-%m-%d %H:%M IST"),
@@ -978,12 +1015,13 @@ def expand_dasha_level(req: DashaExpandRequest):
 @app.post("/api/transit")
 def calculate_custom_transit(req: TransitRequest):
     meta = req.natal_meta
+    ayanamsa_key = meta.get("ayanamsa", "lahiri")
     ist_tz = pytz.timezone("Asia/Kolkata")
     naive_target = datetime.strptime(f"{req.transit_date} {req.transit_time}", "%Y-%m-%d %H:%M")
     ist_target = ist_tz.localize(naive_target)
     utc_target = ist_target.astimezone(pytz.utc)
 
-    delhi_snap = calculate_sidereal_snapshot(utc_target, 28.6139, 77.2090)
+    delhi_snap = calculate_sidereal_snapshot(utc_target, 28.6139, 77.2090, ayanamsa_key)
     transit_signs = {p: int(info["abs_deg"] // 30.0) + 1 for p, info in delhi_snap["raw_planets"].items()}
 
     delhi_chart, delhi_table, delhi_insights = build_varga_chart_and_insights(
