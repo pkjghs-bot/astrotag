@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pysweph
+pytz
+google-genai
+pydantic
