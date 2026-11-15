@@ -121,10 +121,10 @@ async def security_headers_and_size_guard(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com; "
+        "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://adservice.google.com https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
-        "connect-src 'self' https://astrotag-api.onrender.com https://countriesnow.space https://pagead2.googlesyndication.com; "
+        "connect-src 'self' https://astrotag-api.onrender.com https://countriesnow.space https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; "
         "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; "
         "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     )
@@ -132,6 +132,8 @@ async def security_headers_and_size_guard(request: Request, call_next):
 
 # --- CORS CONFIGURATION (DUAL-ORIGIN HARDENED ALLOWLIST) ---
 ALLOWED_ORIGINS = [
+    "https://astro.in",
+    "https://www.astro.in",
     "https://astrotag.in",
     "https://www.astrotag.in",
     "https://astrotag.pages.dev",
@@ -150,7 +152,7 @@ if allowed_origins_env:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"^https://([a-z0-9-]+\.)?astrotag\.(in|pages\.dev|vercel\.app)$",
+    allow_origin_regex=r"^https://([a-z0-9-]+\.)?(astro|astrotag)\.(in|pages\.dev|vercel\.app)$",
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
@@ -1064,6 +1066,33 @@ def serve_index_html():
     if os.path.exists("public/index.html"):
         return FileResponse("public/index.html")
     return FileResponse("index.html")
+
+@app.get("/ads.txt")
+def serve_ads_txt():
+    p = "public/ads.txt" if os.path.exists("public/ads.txt") else "ads.txt"
+    if os.path.exists(p):
+        return FileResponse(p, media_type="text/plain")
+    return Response(content="google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n", media_type="text/plain")
+
+@app.get("/about.html")
+def serve_about():
+    p = "public/about.html" if os.path.exists("public/about.html") else "about.html"
+    return FileResponse(p)
+
+@app.get("/privacy-policy.html")
+def serve_privacy_policy():
+    p = "public/privacy-policy.html" if os.path.exists("public/privacy-policy.html") else "privacy-policy.html"
+    return FileResponse(p)
+
+@app.get("/disclaimer.html")
+def serve_disclaimer():
+    p = "public/disclaimer.html" if os.path.exists("public/disclaimer.html") else "disclaimer.html"
+    return FileResponse(p)
+
+@app.get("/contact.html")
+def serve_contact():
+    p = "public/contact.html" if os.path.exists("public/contact.html") else "contact.html"
+    return FileResponse(p)
 
 @app.post("/api/kundali")
 def generate_kundali(data: BirthInput, request: Request):
