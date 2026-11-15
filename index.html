@@ -749,15 +749,17 @@
   </div>
 
   <script>
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return "";
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+    const RENDER_BACKEND_URL = "https://astrotag-api.onrender.com";
+    const API_BASE = window.location.hostname.endsWith("pages.dev")
+      ? RENDER_BACKEND_URL
+      : "";
+
+    function escapeHTML(str) {
+      return String(str ?? "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
     }
+    const escapeHtml = escapeHTML;
 
     let GLOBAL_KUNDALI_DATA = null;
     let DASHA_PATH_LABELS = [];
@@ -870,7 +872,7 @@
       const tDate = document.getElementById("customTransitDate").value;
       const tTime = document.getElementById("customTransitTime").value;
 
-      const res = await fetch("/api/transit", {
+      const res = await fetch(`${API_BASE}/api/transit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1122,7 +1124,7 @@
           if (level === 1 && p.antardashas) {
             renderDashaColumn(2, "2. Antardasha", p.antardashas, false);
           } else {
-            const res = await fetch("/api/dasha-sublevels", {
+            const res = await fetch(`${API_BASE}/api/dasha-sublevels`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -1164,7 +1166,7 @@
       };
 
       try {
-        const res = await fetch("/api/kundali", {
+        const res = await fetch(`${API_BASE}/api/kundali`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -1249,7 +1251,7 @@
       const box = document.getElementById("aiResponse");
       box.textContent = "AI Agent is analyzing Moon Sign, Sookshma Dasha, Yogakaraka, and D1/D9...";
 
-      const res = await fetch("/api/ask-astrologer", {
+      const res = await fetch(`${API_BASE}/api/ask-astrologer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

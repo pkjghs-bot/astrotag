@@ -117,60 +117,65 @@ async def security_headers_and_size_guard(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=(), payment=()"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()"
+    response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://astrotag-api.onrender.com https://countriesnow.space https://pagead2.googlesyndication.com; "
+        "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; "
+        "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    )
     return response
 
-# --- CORS CONFIGURATION (ENVIRONMENT DRIVEN) ---
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "*")
-if allowed_origins_env.strip() == "*":
-    origins_list = ["*"]
-else:
-    origins_list = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+# --- CORS CONFIGURATION (DUAL-ORIGIN HARDENED ALLOWLIST) ---
+ALLOWED_ORIGINS = [
+    "https://astrotag.in",
+    "https://www.astrotag.in",
+    "https://astrotag.pages.dev",
+    "https://astrotag.vercel.app",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+]
+
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
+if allowed_origins_env:
+    for o in allowed_origins_env.split(","):
+        o_clean = o.strip()
+        if o_clean and o_clean not in ALLOWED_ORIGINS:
+            ALLOWED_ORIGINS.append(o_clean)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins_list,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"^https://([a-z0-9-]+\.)?astrotag\.(in|pages\.dev|vercel\.app)$",
+    allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    allow_headers=["Content-Type"],
+    max_age=3600,
 )
 
-# --- IN-MEMORY RATE LIMITING (SLIDING WINDOW) ---
-class InMemoryRateLimiter:
-    def __init__(self, cleanup_interval: int = 300):
-        self.requests: Dict[str, List[float]] = defaultdict(list)
-        self.cleanup_interval = cleanup_interval
-        self.last_cleanup = time.time()
+# --- IN-MEMORY SLIDING-WINDOW RATE LIMITER ---
+RATE_BUCKETS: Dict[str, List[float]] = defaultdict(list)
 
-    def is_allowed(self, client_ip: str, limit: int, window_seconds: int = 60) -> bool:
-        now = time.time()
-        if now - self.last_cleanup > self.cleanup_interval:
-            self._cleanup(now)
-
-        key = client_ip
-        timestamps = [t for t in self.requests[key] if now - t < window_seconds]
-        if len(timestamps) >= limit:
-            return False
-        timestamps.append(now)
-        self.requests[key] = timestamps
-        return True
-
-    def _cleanup(self, now: float):
-        for key in list(self.requests.keys()):
-            self.requests[key] = [t for t in self.requests[key] if now - t < 120]
-            if not self.requests[key]:
-                del self.requests[key]
-        self.last_cleanup = now
-
-limiter_kundali = InMemoryRateLimiter() # 30 per min
-limiter_ai = InMemoryRateLimiter()      # 6 per min
-limiter_transit = InMemoryRateLimiter() # 30 per min
-
-def get_client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "127.0.0.1"
+def enforce_rate_limit(request: Request, limit: int = 10, window: int = 60):
+    client_ip = (
+        request.headers.get("cf-connecting-ip")
+        or (request.headers.get("x-forwarded-for", "").split(",")[0].strip())
+        or (request.client.host if request.client else "unknown")
+    )
+    now = time.time()
+    RATE_BUCKETS[client_ip] = [t for t in RATE_BUCKETS[client_ip] if now - t < window]
+    if len(RATE_BUCKETS[client_ip]) >= limit:
+        logger.warning(f"Rate limit exceeded for IP {client_ip} (limit: {limit}/{window}s)")
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Please wait a minute and try again.",
+            headers={"Retry-After": str(window)}
+        )
+    RATE_BUCKETS[client_ip].append(now)
 
 # --- VEDIC CONSTANTS ---
 ZODIAC_SIGNS = [
@@ -316,15 +321,15 @@ AYANAMSA_MODES = {
 
 # --- REQUEST MODELS WITH STRICT INPUT VALIDATION ---
 class BirthInput(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
+    name: str = Field(..., min_length=1, max_length=80)
     dob: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    tob: str = Field(..., pattern=r"^\d{2}:\d{2}$")
-    country: str = Field(..., min_length=1, max_length=100)
-    country_code: Optional[str] = Field("", max_length=10)
-    state: str = Field(..., min_length=1, max_length=100)
-    city: str = Field(..., min_length=1, max_length=100)
-    pincode: Optional[str] = Field("", max_length=20)
-    ayanamsa: Optional[str] = Field("lahiri", max_length=20)
+    tob: str = Field(..., pattern=r"^\d{2}:\d{2}(:\d{2})?$")
+    country: str = Field(..., min_length=2, max_length=60)
+    country_code: Optional[str] = Field(default="", max_length=4)
+    state: str = Field(..., min_length=1, max_length=80)
+    city: str = Field(..., min_length=1, max_length=80)
+    pincode: Optional[str] = Field(default="", max_length=15)
+    ayanamsa: Optional[str] = Field(default="lahiri", pattern=r"^(lahiri|raman|kp)$")
 
     @field_validator("name")
     @classmethod
@@ -333,7 +338,7 @@ class BirthInput(BaseModel):
         cleaned = re.sub(r"[<>\";{}()/\\]", "", v).strip()
         if not cleaned:
             raise ValueError("Name cannot be empty or contain only symbols.")
-        return cleaned[:100]
+        return cleaned[:80]
 
     @field_validator("dob")
     @classmethod
@@ -354,8 +359,12 @@ class BirthInput(BaseModel):
             h, m = int(parts[0]), int(parts[1])
             if h < 0 or h > 23 or m < 0 or m > 59:
                 raise ValueError("Invalid time of birth.")
+            if len(parts) == 3:
+                s = int(parts[2])
+                if s < 0 or s > 59:
+                    raise ValueError("Invalid seconds in time of birth.")
         except Exception:
-            raise ValueError("Invalid time of birth. Must be valid 24h HH:MM format.")
+            raise ValueError("Invalid time of birth. Must be valid 24h HH:MM or HH:MM:SS format.")
         return v
 
     @field_validator("ayanamsa")
@@ -1058,14 +1067,7 @@ def serve_index_html():
 
 @app.post("/api/kundali")
 def generate_kundali(data: BirthInput, request: Request):
-    client_ip = get_client_ip(request)
-    if not limiter_kundali.is_allowed(client_ip, limit=30, window_seconds=60):
-        logger.warning(f"Rate limit exceeded for IP {client_ip} on /api/kundali")
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded (30 calculations per minute). Please wait a moment before trying again.",
-            headers={"Retry-After": "60"}
-        )
+    enforce_rate_limit(request, limit=30, window=60)
 
     try:
         loc = resolve_global_location(data.country, data.country_code or "", data.state, data.city, data.pincode or "")
@@ -1083,7 +1085,10 @@ def generate_kundali(data: BirthInput, request: Request):
             tz_name = "UTC"
             local_tz = pytz.utc
 
-        naive_dt = datetime.strptime(f"{data.dob} {data.tob}", "%Y-%m-%d %H:%M")
+        try:
+            naive_dt = datetime.strptime(f"{data.dob} {data.tob}", "%Y-%m-%d %H:%M")
+        except ValueError:
+            naive_dt = datetime.strptime(f"{data.dob} {data.tob}", "%Y-%m-%d %H:%M:%S")
         local_dt = local_tz.localize(naive_dt)
         utc_dt = local_dt.astimezone(pytz.utc)
 
@@ -1202,7 +1207,7 @@ def generate_kundali(data: BirthInput, request: Request):
         logger.error(f"Unexpected error in generate_kundali: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while calculating the chart. Please check your inputs and try again."
+            detail="Unable to process request right now. Please verify inputs and try again."
         )
 
 @app.post("/api/dasha-sublevels")
@@ -1221,14 +1226,7 @@ def expand_dasha_level(req: DashaExpandRequest):
 
 @app.post("/api/transit")
 def calculate_custom_transit(req: TransitRequest, request: Request):
-    client_ip = get_client_ip(request)
-    if not limiter_transit.is_allowed(client_ip, limit=30, window_seconds=60):
-        logger.warning(f"Rate limit exceeded for IP {client_ip} on /api/transit")
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded. Please wait a minute before requesting another transit snapshot.",
-            headers={"Retry-After": "60"}
-        )
+    enforce_rate_limit(request, limit=30, window=60)
 
     try:
         meta = req.natal_meta
@@ -1270,19 +1268,12 @@ def calculate_custom_transit(req: TransitRequest, request: Request):
         logger.error(f"Unexpected error in calculate_custom_transit: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while calculating the custom transit snapshot."
+            detail="Unable to process request right now. Please verify inputs and try again."
         )
 
 @app.post("/api/ask-astrologer")
 def ask_agentic_astrologer(req: AgentQuery, request: Request):
-    client_ip = get_client_ip(request)
-    if not limiter_ai.is_allowed(client_ip, limit=6, window_seconds=60):
-        logger.warning(f"AI Astrologer rate limit exceeded for IP {client_ip}")
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="AI Astrologer request limit reached (6 requests per minute). Please wait a moment before asking another question.",
-            headers={"Retry-After": "60"}
-        )
+    enforce_rate_limit(request, limit=6, window=60)
 
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
@@ -1328,5 +1319,5 @@ def ask_agentic_astrologer(req: AgentQuery, request: Request):
         logger.error(f"Gemini API invocation error: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="The AI Astrologer could not process your query at this time. Please try again shortly."
+            detail="Unable to process request right now. Please verify inputs and try again."
         )
