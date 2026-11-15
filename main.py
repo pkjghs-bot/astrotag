@@ -139,6 +139,7 @@ ALLOWED_ORIGINS = [
     "https://astrotag-in.pages.dev",
     "https://astrotag.pages.dev",
     "https://astrotag.vercel.app",
+    "https://astrotag-in.pkjghs.workers.dev",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
 ]
@@ -153,7 +154,7 @@ if allowed_origins_env:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"^https://([a-z0-9-]+\.)?astrotags?\.(in|pages\.dev|vercel\.app)$",
+    allow_origin_regex=r"^https://([a-z0-9-]+\.)?astrotags?\.(in|pages\.dev|vercel\.app)$|^https://([a-z0-9-]+\.)?pkjghs\.workers\.dev$",
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
