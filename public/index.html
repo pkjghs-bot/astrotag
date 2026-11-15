@@ -800,13 +800,9 @@
 
   <script>
     const RENDER_BACKEND_URL = "https://astrotag-api.onrender.com";
-    const host = window.location.hostname;
-
-    // On Vercel (*.vercel.app) or localhost, use same-origin /api/*.
-    // On Cloudflare Pages (astro.in, astrotag.in, *.pages.dev), route API calls to Render.
-    const API_BASE = (host.endsWith("vercel.app") || host === "localhost" || host === "127.0.0.1")
-      ? ""
-      : RENDER_BACKEND_URL;
+    const API_BASE = window.location.hostname.endsWith("pages.dev")
+      ? RENDER_BACKEND_URL
+      : "";
 
     function escapeHTML(str) {
       return String(str ?? "").replace(/[&<>"']/g, m => ({
