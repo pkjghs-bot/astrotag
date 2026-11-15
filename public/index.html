@@ -749,6 +749,16 @@
   </div>
 
   <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     let GLOBAL_KUNDALI_DATA = null;
     let DASHA_PATH_LABELS = [];
 
@@ -797,12 +807,12 @@
         const json = await res.json();
         const states = (json.data && json.data.states) ? json.data.states.map(s => s.name) : [];
         if (states.length > 0) {
-          stateSelect.innerHTML = states.map(s => `<option value="${s}">${s}</option>`).join("");
+          stateSelect.innerHTML = states.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
         } else {
-          stateSelect.innerHTML = `<option value="${selectedCountry}">${selectedCountry} (Main Region)</option>`;
+          stateSelect.innerHTML = `<option value="${escapeHtml(selectedCountry)}">${escapeHtml(selectedCountry)} (Main Region)</option>`;
         }
       } catch (e) {
-        stateSelect.innerHTML = `<option value="${selectedCountry}">${selectedCountry}</option>`;
+        stateSelect.innerHTML = `<option value="${escapeHtml(selectedCountry)}">${escapeHtml(selectedCountry)}</option>`;
       }
     }
 
@@ -846,11 +856,11 @@
 
       document.getElementById("transitTableBody").innerHTML = transit.table.map(t => `
         <tr>
-          <td><strong>${t.planet}</strong> ${t.is_retrograde ? "*" : ""}</td>
-          <td>${t.sign_name} ${t.degree}°</td>
-          <td>${t.nakshatra}</td>
-          <td>House ${t.house}</td>
-          <td>${t.house_lord}</td>
+          <td><strong>${escapeHtml(t.planet)}</strong> ${t.is_retrograde ? "*" : ""}</td>
+          <td>${escapeHtml(t.sign_name)} ${escapeHtml(t.degree)}°</td>
+          <td>${escapeHtml(t.nakshatra)}</td>
+          <td>House ${escapeHtml(t.house)}</td>
+          <td>${escapeHtml(t.house_lord)}</td>
         </tr>
       `).join("");
     }
@@ -959,24 +969,24 @@
 
       const anime = getAnimePlanetCharacterSVG(pItem.planet, 220);
       const statusBadge = pItem.is_dasha_active 
-        ? `<span style="background:#16a34a; color:#fff; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">${pItem.dasha_status}</span>`
-        : `<span style="background:#efe6d8; color:#5c4b3c; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">${pItem.dasha_status}</span>`;
+        ? `<span style="background:#16a34a; color:#fff; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">${escapeHtml(pItem.dasha_status)}</span>`
+        : `<span style="background:#efe6d8; color:#5c4b3c; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">${escapeHtml(pItem.dasha_status)}</span>`;
 
       document.getElementById("planetRoleDetailContent").innerHTML = `
         <div class="anime-stage-card">
           <div class="anime-frame">
             ${anime.svg}
-            <h2 style="margin:12px 0 4px; color:#b84a14;">${pItem.planet} (${pItem.short})</h2>
-            <div style="font-size:13px; color:#666; margin-bottom:10px;">${pItem.house_and_nak}</div>
+            <h2 style="margin:12px 0 4px; color:#b84a14;">${escapeHtml(pItem.planet)} (${escapeHtml(pItem.short)})</h2>
+            <div style="font-size:13px; color:#666; margin-bottom:10px;">${escapeHtml(pItem.house_and_nak)}</div>
             <div>${statusBadge}</div>
           </div>
           <div>
-            <div class="speech-bubble"><strong>"${pItem.planet} speaks:"</strong><br/>&ldquo;${anime.quote}&rdquo;</div>
-            <h2 style="margin:0 0 8px;">Planets as per you: ${pItem.archetype_title}</h2>
-            <p style="font-size:14.5px; margin:0 0 10px;"><strong>Human Representation:</strong> ${pItem.human_role}</p>
-            <p style="font-size:14.5px; margin:0 0 10px;"><strong>Life Manifestation:</strong> ${pItem.life_manifestation}</p>
+            <div class="speech-bubble"><strong>"${escapeHtml(pItem.planet)} speaks:"</strong><br/>&ldquo;${escapeHtml(anime.quote)}&rdquo;</div>
+            <h2 style="margin:0 0 8px;">Planets as per you: ${escapeHtml(pItem.archetype_title)}</h2>
+            <p style="font-size:14.5px; margin:0 0 10px;"><strong>Human Representation:</strong> ${escapeHtml(pItem.human_role)}</p>
+            <p style="font-size:14.5px; margin:0 0 10px;"><strong>Life Manifestation:</strong> ${escapeHtml(pItem.life_manifestation)}</p>
             <div style="background:#faf6f0; border:1px solid #e0d3c1; border-radius:8px; padding:14px; font-size:14px;">
-              <strong>Your Chart &amp; Current Dasha Synthesis:</strong><br/>${pItem.personalized_note}
+              <strong>Your Chart &amp; Current Dasha Synthesis:</strong><br/>${escapeHtml(pItem.personalized_note)}
             </div>
           </div>
         </div>
@@ -1014,15 +1024,19 @@
 
       const popup = window.open("", `House_${chartKey}_${houseNum}`, "width=680,height=760,scrollbars=yes,resizable=yes");
       if (!popup) return alert("Please allow pop-ups in your browser.");
+      try { popup.opener = null; } catch (e) {}
 
-      const occHtml = insight.occupant_details.length ? insight.occupant_details.map(o => `<li>${o}</li>`).join("") : "<li>Empty House</li>";
-      const aspHtml = insight.aspects.length ? insight.aspects.map(a => `<li><strong>${a.planet}</strong> from House ${a.from_house} (${a.aspect_type}) — <em>Nak: ${a.nakshatra} (Lord: ${a.nakshatra_lord}) | ${a.dignity}: ${a.reason}</em></li>`).join("") : "<li>No planetary aspects on this house.</li>";
-      const dashaHtml = insight.dasha_breakdown.map(line => `<li>${line}</li>`).join("");
-      const goodHtml = insight.good_planets.length ? insight.good_planets.map(g => `<li style="color:#15803d;">✔ ${g}</li>`).join("") : "<li>None</li>";
-      const weakHtml = insight.weak_planets.length ? insight.weak_planets.map(w => `<li style="color:#b91c1c;">✖ ${w}</li>`).join("") : "<li>None</li>";
+      const occHtml = insight.occupant_details.length ? insight.occupant_details.map(o => `<li>${escapeHtml(o)}</li>`).join("") : "<li>Empty House</li>";
+      const aspHtml = insight.aspects.length ? insight.aspects.map(a => `<li><strong>${escapeHtml(a.planet)}</strong> from House ${escapeHtml(a.from_house)} (${escapeHtml(a.aspect_type)}) — <em>Nak: ${escapeHtml(a.nakshatra)} (Lord: ${escapeHtml(a.nakshatra_lord)}) | ${escapeHtml(a.dignity)}: ${escapeHtml(a.reason)}</em></li>`).join("") : "<li>No planetary aspects on this house.</li>";
+      const dashaHtml = insight.dasha_breakdown.map(line => `<li>${escapeHtml(line)}</li>`).join("");
+      const goodHtml = insight.good_planets.length ? insight.good_planets.map(g => `<li style="color:#15803d;">✔ ${escapeHtml(g)}</li>`).join("") : "<li>None</li>";
+      const weakHtml = insight.weak_planets.length ? insight.weak_planets.map(w => `<li style="color:#b91c1c;">✖ ${escapeHtml(w)}</li>`).join("") : "<li>None</li>";
+
+      const safeGreenPct = Math.max(0, Math.min(100, Number(insight.green_pct) || 0));
+      const safeRedPct = Math.max(0, Math.min(100, Number(insight.red_pct) || 0));
 
       popup.document.write(`
-        <!DOCTYPE html><html><head><title>${chartKey} House ${houseNum}</title>
+        <!DOCTYPE html><html><head><title>${escapeHtml(chartKey)} House ${escapeHtml(houseNum)}</title>
         <style>
           body { font-family: system-ui, sans-serif; background: #faf6f0; color: #2a1d15; padding: 20px; }
           .card { background: #fff; border: 1px solid #e0d3c1; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
@@ -1034,14 +1048,14 @@
           .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         </style></head><body>
           <div class="card">
-            <h2>${chartKey} — House ${houseNum}: ${insight.sign_name} (Sign #${insight.sign_num})</h2>
-            <p><strong>House Lord:</strong> ${insight.house_lord} [${insight.lord_nakshatra}]</p>
+            <h2>${escapeHtml(chartKey)} — House ${escapeHtml(houseNum)}: ${escapeHtml(insight.sign_name)} (Sign #${escapeHtml(insight.sign_num)})</h2>
+            <p><strong>House Lord:</strong> ${escapeHtml(insight.house_lord)} [${escapeHtml(insight.lord_nakshatra)}]</p>
           </div>
           <div class="card">
-            <h3>Current Dasha Result (Up to Sookshma Dasha): ${insight.active_dasha_4}</h3>
+            <h3>Current Dasha Result (Up to Sookshma Dasha): ${escapeHtml(insight.active_dasha_4)}</h3>
             <div class="meter">
-              <div class="g-bar" style="width:${insight.green_pct}%;">Good: ${insight.green_pct}%</div>
-              <div class="r-bar" style="width:${insight.red_pct}%;">Challenging: ${insight.red_pct}%</div>
+              <div class="g-bar" style="width:${safeGreenPct}%;">Good: ${safeGreenPct}%</div>
+              <div class="r-bar" style="width:${safeRedPct}%;">Challenging: ${safeRedPct}%</div>
             </div>
             <ul>${dashaHtml}</ul>
           </div>
@@ -1083,7 +1097,7 @@
       const col = document.createElement("div");
       col.className = "dasha-col";
       col.dataset.level = level;
-      col.innerHTML = `<div class="dasha-col-header">${title}</div>`;
+      col.innerHTML = `<div class="dasha-col-header">${escapeHtml(title)}</div>`;
 
       periods.forEach(p => {
         const card = document.createElement("div");
@@ -1093,7 +1107,7 @@
           card.classList.add("selected");
           DASHA_PATH_LABELS.push(`${p.lord} (${p.level_name})`);
         }
-        card.innerHTML = `<div class="node-title"><span>${p.lord}${isLive ? '<span class="live-pill">NOW</span>' : ''}</span><span>${p.has_children ? '→' : ''}</span></div><div class="node-dates">${p.start}<br/>to ${p.end}</div>`;
+        card.innerHTML = `<div class="node-title"><span>${escapeHtml(p.lord)}${isLive ? '<span class="live-pill">NOW</span>' : ''}</span><span>${p.has_children ? '→' : ''}</span></div><div class="node-dates">${escapeHtml(p.start)}<br/>to ${escapeHtml(p.end)}</div>`;
 
         card.onclick = async () => {
           col.querySelectorAll(".dasha-node").forEach(n => n.classList.remove("selected"));
@@ -1165,10 +1179,10 @@
 
         document.getElementById("workspace").style.display = "block";
         document.getElementById("profileBanner").innerHTML = `
-          <div class="profile-item"><strong>Native &amp; Birth</strong>${data.profile.name} (${data.profile.dob} at ${data.profile.tob})</div>
-          <div class="profile-item"><strong>Location &amp; Coordinates</strong>${data.profile.place}<br/><small>${data.profile.coords}</small></div>
-          <div class="profile-item"><strong>Ascendant &amp; Moon Sign</strong>Lagna: ${data.profile.ascendant}<br/>Moon: ${data.profile.moon_sign}</div>
-          <div class="profile-item"><strong>Running Dasha &amp; Ayanamsa</strong>${data.profile.running_dasha}<br/><small>Ayanamsa: ${data.profile.ayanamsa || "Lahiri"}</small></div>
+          <div class="profile-item"><strong>Native &amp; Birth</strong>${escapeHtml(data.profile.name)} (${escapeHtml(data.profile.dob)} at ${escapeHtml(data.profile.tob)})</div>
+          <div class="profile-item"><strong>Location &amp; Coordinates</strong>${escapeHtml(data.profile.place)}<br/><small>${escapeHtml(data.profile.coords)}</small></div>
+          <div class="profile-item"><strong>Ascendant &amp; Moon Sign</strong>Lagna: ${escapeHtml(data.profile.ascendant)}<br/>Moon: ${escapeHtml(data.profile.moon_sign)}</div>
+          <div class="profile-item"><strong>Running Dasha &amp; Ayanamsa</strong>${escapeHtml(data.profile.running_dasha)}<br/><small>Ayanamsa: ${escapeHtml(data.profile.ayanamsa || "Lahiri")}</small></div>
         `;
 
         document.getElementById("chart-D1").innerHTML = renderNorthIndianSVG(data.charts.D1, "D1");
@@ -1183,12 +1197,12 @@
           const rowStyle = p.is_ascendant ? 'style="background:#fff8ee; font-weight:600;"' : "";
           return `
             <tr ${rowStyle}>
-              <td><strong>${p.planet}</strong> (${p.short})</td>
-              <td>${p.sign_name} ${p.degree}°</td>
-              <td>${p.nakshatra} [#${p.nakshatra_num}]</td>
-              <td>House ${p.house}</td>
-              <td>${p.house_lord}</td>
-              <td>${p.nakshatra_lord}</td>
+              <td><strong>${escapeHtml(p.planet)}</strong> (${escapeHtml(p.short)})</td>
+              <td>${escapeHtml(p.sign_name)} ${escapeHtml(p.degree)}°</td>
+              <td>${escapeHtml(p.nakshatra)} [#${escapeHtml(p.nakshatra_num)}]</td>
+              <td>House ${escapeHtml(p.house)}</td>
+              <td>${escapeHtml(p.house_lord)}</td>
+              <td>${escapeHtml(p.nakshatra_lord)}</td>
               <td>${badges || "Normal"}</td>
             </tr>
           `;
@@ -1215,7 +1229,7 @@
         initHorizontalDasha(data.dasha, data.active_dasha_chain);
 
         document.getElementById("planetClassificationBody").innerHTML = data.planet_classifications.map(c => `
-          <tr><td><strong>${c.planet}</strong> (${c.short})</td><td>${c.owned_houses}</td><td>${c.karaka}</td><td><strong>${c.yogakaraka}</strong></td><td>${c.functional_benefic}</td><td>${c.badhaka}</td><td>${c.maraka}</td></tr>
+          <tr><td><strong>${escapeHtml(c.planet)}</strong> (${escapeHtml(c.short)})</td><td>${escapeHtml(c.owned_houses)}</td><td>${escapeHtml(c.karaka)}</td><td><strong>${escapeHtml(c.yogakaraka)}</strong></td><td>${escapeHtml(c.functional_benefic)}</td><td>${escapeHtml(c.badhaka)}</td><td>${escapeHtml(c.maraka)}</td></tr>
         `).join("");
 
         document.getElementById("planetGalleryGrid").innerHTML = data.planet_classifications.map(c => {
