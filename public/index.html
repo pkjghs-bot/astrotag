@@ -569,6 +569,103 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Today's Personalized Astro Outlook */
+    .outlook-header-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .outlook-header-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .outlook-header-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .outlook-header-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .outlook-item-card {
+      border-radius: 8px;
+      padding: 14px 18px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .outlook-item-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .outlook-item-card.favourable {
+      background: #eaf6ee;
+      color: #1e6b3a;
+      border: 1px solid #b7dfc4;
+    }
+    .outlook-item-card.mindful {
+      background: #fdf0f2;
+      color: #9e3348;
+      border: 1px solid #ecc6ce;
+    }
+    .outlook-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .outlook-item-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .outlook-item-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .outlook-item-card.favourable .outlook-item-badge {
+      background: #ccebda;
+      color: #155724;
+      border: 1px solid #a3d9bc;
+    }
+    .outlook-item-card.mindful .outlook-item-badge {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .outlook-item-summary {
+      font-size: 13.5px;
+      line-height: 1.55;
+      margin: 0;
+    }
+    .outlook-footnote {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 14px;
+      text-align: center;
+      border-top: 1px dashed var(--border);
+      padding-top: 10px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -797,6 +894,27 @@
           <h3 style="font-size:19px; margin-bottom:6px;">Planets as per you</h3>
           <div class="planet-clean-grid" id="planetGalleryGrid"></div>
         </div>
+
+        <!-- TODAY'S PERSONALIZED ASTRO OUTLOOK -->
+        <div class="table-card" id="dailyOutlookCard" style="margin-top:20px; padding:22px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:2px solid var(--border); padding-bottom:10px;">
+            <h3 style="font-size:20px; margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
+              <span>Today's Personalized Astro Outlook</span>
+            </h3>
+            <span id="outlookGenTimeBadge" style="font-size:12px; background:#fff7ed; color:var(--primary-dark); padding:4px 10px; border-radius:6px; border:1px solid #fed7aa; font-weight:600;"></span>
+          </div>
+
+          <!-- Compact Summary Header Bar -->
+          <div id="outlookHeaderBar" class="outlook-header-bar"></div>
+
+          <!-- 5 Concise Outlook Items -->
+          <div id="outlookItemsContainer" class="outlook-items-container" style="display:flex; flex-direction:column; gap:12px; margin-top:16px;"></div>
+
+          <!-- Subtle 1-line Footnote -->
+          <div class="outlook-footnote">
+            Astrological outlook evaluates your Level-3 Pratyantardasha, Sade Sati, and current Gochar (transits) from your Ascendant at the time of chart generation, and is intended for traditional guidance only.
+          </div>
+        </div>
       </div>
 
       <!-- SUB-PAGE 4B: 2D ANIME CHARACTER VIEW -->
@@ -998,7 +1116,9 @@
       if (res.ok) {
         const transitData = await res.json();
         Object.assign(GLOBAL_KUNDALI_DATA.chart_insights, transitData.insights);
+        GLOBAL_KUNDALI_DATA.transit = transitData;
         renderTransitSection(transitData);
+        renderDailyOutlook(GLOBAL_KUNDALI_DATA);
       }
     }
 
@@ -1006,6 +1126,7 @@
       if (!GLOBAL_KUNDALI_DATA) return;
       setDefaultTransitInputs();
       renderTransitSection(GLOBAL_KUNDALI_DATA.transit);
+      renderDailyOutlook(GLOBAL_KUNDALI_DATA);
     }
 
     function getAnimePlanetCharacterSVG(planetName, size = 135) {
@@ -1260,6 +1381,224 @@
       wrapper.appendChild(col);
     }
 
+    function renderDailyOutlook(data) {
+      if (!data) return;
+      const card = document.getElementById("dailyOutlookCard");
+      if (!card) return;
+
+      const ZODIAC_SIGNS = [
+        "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+        "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+      ];
+
+      // 1. Ascendant
+      let ascSignNum = data.natal_meta?.d1_asc_sign;
+      if (!ascSignNum && data.profile?.ascendant) {
+        const ascName = data.profile.ascendant.split(" ")[0].trim();
+        const idx = ZODIAC_SIGNS.findIndex(s => s.toLowerCase() === ascName.toLowerCase());
+        if (idx !== -1) ascSignNum = idx + 1;
+      }
+      if (!ascSignNum && data.planet_table) {
+        const ascRow = data.planet_table.find(p => p.is_ascendant);
+        if (ascRow) ascSignNum = ascRow.sign_num || (ZODIAC_SIGNS.indexOf(ascRow.sign_name) + 1);
+      }
+      if (!ascSignNum) ascSignNum = 1;
+      const ascSignName = ZODIAC_SIGNS[ascSignNum - 1] || "Aries";
+
+      // 2. Natal Moon Sign
+      let natalMoonSign = data.natal_meta?.natal_moon_sign;
+      if (!natalMoonSign && data.planet_table) {
+        const mRow = data.planet_table.find(p => p.planet === "Moon");
+        if (mRow) natalMoonSign = mRow.sign_num || (ZODIAC_SIGNS.indexOf(mRow.sign_name) + 1);
+      }
+      if (!natalMoonSign && data.profile?.moon_sign) {
+        const mName = data.profile.moon_sign.split(" ")[0].trim();
+        const idx = ZODIAC_SIGNS.findIndex(s => s.toLowerCase() === mName.toLowerCase());
+        if (idx !== -1) natalMoonSign = idx + 1;
+      }
+      if (!natalMoonSign) natalMoonSign = 1;
+
+      // 3. Active Dasha up to Level 3 (Pratyantardasha)
+      let md = "", ad = "", pd = "";
+      if (Array.isArray(data.active_dasha_chain) && data.active_dasha_chain.length >= 3) {
+        md = data.active_dasha_chain[0]?.active_lord || "";
+        ad = data.active_dasha_chain[1]?.active_lord || "";
+        pd = data.active_dasha_chain[2]?.active_lord || "";
+      }
+      if (!md || !ad || !pd) {
+        const a4 = data.natal_meta?.active_dasha_4 || [];
+        md = md || a4[0] || "Active";
+        ad = ad || a4[1] || "Active";
+        pd = pd || a4[2] || "Active";
+      }
+      const activeDashaStr = data.daily_outlook?.active_dasha || `${md} → ${ad} → ${pd}`;
+
+      // 4. Transit Planets lookup relative to Ascendant (Lagna)
+      const transitTable = data.transit?.table || [];
+      function getTransitInfo(pName) {
+        const row = transitTable.find(t => t.planet === pName);
+        if (!row) return { sign_num: 1, house: 1, sign_name: "Aries", is_retrograde: false };
+        const sNum = row.sign_num || (ZODIAC_SIGNS.indexOf(row.sign_name) + 1) || 1;
+        const hFromAsc = ((sNum - ascSignNum + 12) % 12) + 1;
+        return {
+          sign_num: sNum,
+          house: hFromAsc,
+          sign_name: row.sign_name || ZODIAC_SIGNS[sNum - 1],
+          is_retrograde: !!row.is_retrograde
+        };
+      }
+
+      const saturn = getTransitInfo("Saturn");
+      const jupiter = getTransitInfo("Jupiter");
+      const venus = getTransitInfo("Venus");
+      const mars = getTransitInfo("Mars");
+      const mercury = getTransitInfo("Mercury");
+
+      // 5. Sade Sati calculation: (Active — Rising/Peak/Setting Phase or Inactive)
+      let sadeSatiStatus = "";
+      if (data.daily_outlook?.sade_sati) {
+        sadeSatiStatus = data.daily_outlook.sade_sati;
+      } else {
+        const satDiff = (saturn.sign_num - natalMoonSign + 12) % 12;
+        if (satDiff === 11) sadeSatiStatus = "Active — Rising Phase";
+        else if (satDiff === 0) sadeSatiStatus = "Active — Peak Phase";
+        else if (satDiff === 1) sadeSatiStatus = "Active — Setting Phase";
+        else sadeSatiStatus = "Inactive";
+      }
+      const isSadeSatiActive = sadeSatiStatus.startsWith("Active");
+
+      // 6. Generation Date & Time
+      let genTime = data.daily_outlook?.timestamp || data.daily_outlook?.generation_time || data.transit?.timestamp || "";
+      if (!genTime) {
+        const now = new Date();
+        genTime = now.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) +
+          " " + now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) + " IST";
+      }
+
+      // 7. Gochar Basis
+      const gocharBasis = data.daily_outlook?.gochar_basis || "Current Gochar (Transits) evaluated from Ascendant (Lagna)";
+
+      // Update Header Bar
+      const badgeEl = document.getElementById("outlookGenTimeBadge");
+      if (badgeEl) badgeEl.textContent = `Generated: ${genTime}`;
+
+      const headerBarEl = document.getElementById("outlookHeaderBar");
+      if (headerBarEl) {
+        const sadeSatiColor = isSadeSatiActive ? "#9e3348" : "#1e6b3a";
+        headerBarEl.innerHTML = `
+          <div class="outlook-header-item">
+            <span class="outlook-header-label">Generation Date &amp; Time</span>
+            <span class="outlook-header-value">${escapeHtml(genTime)}</span>
+          </div>
+          <div class="outlook-header-item">
+            <span class="outlook-header-label">Active Dasha (Level 3)</span>
+            <span class="outlook-header-value">${escapeHtml(activeDashaStr)}</span>
+          </div>
+          <div class="outlook-header-item">
+            <span class="outlook-header-label">Sade Sati Status</span>
+            <span class="outlook-header-value" style="color:${sadeSatiColor}; font-weight:700;">${escapeHtml(sadeSatiStatus)}</span>
+          </div>
+          <div class="outlook-header-item">
+            <span class="outlook-header-label">Gochar Basis</span>
+            <span class="outlook-header-value">${escapeHtml(gocharBasis)}</span>
+          </div>
+        `;
+      }
+
+      // 8. Items: Check if server provided items, else client-side fallback
+      let items = [];
+      if (data.daily_outlook && Array.isArray(data.daily_outlook.items) && data.daily_outlook.items.length >= 5) {
+        items = data.daily_outlook.items;
+      } else {
+        const isPdBenefic = ["Jupiter", "Venus", "Mercury", "Moon"].includes(pd);
+        const jupKendraTrikona = [1, 4, 5, 7, 9, 10, 11].includes(jupiter.house);
+        const venStrong = [1, 2, 4, 5, 7, 9, 11].includes(venus.house);
+        const merStrong = [2, 5, 9, 10, 11].includes(mercury.house) && !mercury.is_retrograde;
+
+        // 1. Present Scenario
+        const p1Favour = (jupKendraTrikona && (!isSadeSatiActive || isPdBenefic));
+        const p1Status = p1Favour ? "favourable" : "mindful";
+        const p1Summary = p1Favour
+          ? `Operating under ${pd} Pratyantardasha (${md}–${ad}) with Sade Sati ${sadeSatiStatus.toLowerCase()}, current Gochar from your ${ascSignName} Ascendant (Lagna) places Jupiter in House ${jupiter.house}, promoting steady clarity, balanced vitality, and supportive outcomes across your daily initiatives.`
+          : `With your ${pd} Pratyantardasha active under ${md}–${ad} alongside Sade Sati (${sadeSatiStatus}), current Gochar from your ${ascSignName} Ascendant (Lagna) with Saturn in House ${saturn.house} advises maintaining disciplined pacing, emotional equilibrium, and adhering to steady routines over hasty pivots.`;
+
+        // 2. Love Life
+        const p2Favour = (venStrong && !isSadeSatiActive) || (venStrong && [1, 5, 7, 9].includes(jupiter.house));
+        const p2Status = p2Favour ? "favourable" : "mindful";
+        const p2Summary = p2Favour
+          ? `Under ${pd} Pratyantardasha with Sade Sati ${sadeSatiStatus.toLowerCase()}, current Gochar from your ${ascSignName} Ascendant (Lagna) places Venus in House ${venus.house}, fostering heartfelt warmth, mutual understanding, and reassuring harmony in personal relationships.`
+          : `Under your running ${pd} Pratyantardasha and Sade Sati (${sadeSatiStatus}), current Gochar from your ${ascSignName} Ascendant (Lagna) with Venus transiting House ${venus.house} recommends attentive listening, giving each other breathing space, and handling sensitive feelings with gentle grace.`;
+
+        // 3. Good Time to Buy Vehicle
+        const p3Favour = (venus.house === 4 || jupiter.house === 4 || (venStrong && [1, 4, 5, 9, 11].includes(jupiter.house) && !isSadeSatiActive));
+        const p3Status = p3Favour ? "favourable" : "mindful";
+        const p3Summary = p3Favour
+          ? `Supported by ${pd} Pratyantardasha and Sade Sati ${sadeSatiStatus.toLowerCase()}, current Gochar from your ${ascSignName} Ascendant (Lagna) auspiciously stimulates your 4th house conveyance axis with Venus in House ${venus.house}, supporting smooth vehicle bookings and enjoyable acquisitions.`
+          : `Operating under ${pd} Pratyantardasha and Sade Sati (${sadeSatiStatus}), current Gochar from your ${ascSignName} Ascendant (Lagna) across your 4th house conveyance sector suggests verifying paperwork, comparing vehicle safety ratings, and postponing impulsive automobile commitments for now.`;
+
+        // 4. Good Time to Buy Luxury Items
+        const p4Favour = (venStrong && !venus.is_retrograde && (!isSadeSatiActive || jupiter.house === 11 || jupiter.house === 2));
+        const p4Status = p4Favour ? "favourable" : "mindful";
+        const p4Summary = p4Favour
+          ? `Aligning your ${pd} Pratyantardasha with Sade Sati ${sadeSatiStatus.toLowerCase()}, current Gochar from your ${ascSignName} Ascendant (Lagna) positions Venus in House ${venus.house}, favoring curated lifestyle upgrades, decorative comforts, and tasteful personal investments that bring enduring contentment.`
+          : `With ${pd} Pratyantardasha active alongside Sade Sati (${sadeSatiStatus}), current Gochar from your ${ascSignName} Ascendant (Lagna) suggests practicing mindful budgeting, prioritizing durable necessities, and resisting fleeting impulse buys in luxury retail.`;
+
+        // 5. Good Time to Buy Share or Investment
+        const p5Favour = (merStrong && (jupiter.house === 2 || jupiter.house === 5 || jupiter.house === 9 || jupiter.house === 11) && !isSadeSatiActive);
+        const p5Status = p5Favour ? "favourable" : "mindful";
+        const p5Summary = p5Favour
+          ? `Navigating ${pd} Pratyantardasha with Sade Sati ${sadeSatiStatus.toLowerCase()}, current Gochar from your ${ascSignName} Ascendant (Lagna) places Jupiter in House ${jupiter.house} and Mercury in House ${mercury.house}, supporting disciplined asset allocation, balanced SIP expansions, and calculated long-term wealth growth.`
+          : `Under your running ${pd} Pratyantardasha amidst Sade Sati (${sadeSatiStatus}), current Gochar from your ${ascSignName} Ascendant (Lagna) across wealth houses advises avoiding volatile speculative positions or debt leverage, favoring capital preservation and thorough fundamental due diligence.`;
+
+        items = [
+          { title: "Present Scenario", status: p1Status, summary: p1Summary, icon: "🪐" },
+          { title: "Love Life", status: p2Status, summary: p2Summary, icon: "❤️" },
+          { title: "Good Time to Buy Vehicle", status: p3Status, summary: p3Summary, icon: "🚗" },
+          { title: "Good Time to Buy Luxury Items", status: p4Status, summary: p4Summary, icon: "✨" },
+          { title: "Good Time to Buy Share or Investment", status: p5Status, summary: p5Summary, icon: "📈" }
+        ];
+      }
+
+      // Render items
+      const itemsContainer = document.getElementById("outlookItemsContainer");
+      if (itemsContainer) {
+        const defaultIcons = ["🪐", "❤️", "🚗", "✨", "📈"];
+        itemsContainer.innerHTML = items.slice(0, 5).map((item, idx) => {
+          const rawStatus = (item.status || item.type || "").toLowerCase();
+          const isFavour = rawStatus.includes("favour") || rawStatus.includes("good") || rawStatus.includes("positive");
+          const statusClass = isFavour ? "favourable" : "mindful";
+          const inlineStyle = isFavour
+            ? "background: #eaf6ee; color: #1e6b3a; border: 1px solid #b7dfc4;"
+            : "background: #fdf0f2; color: #9e3348; border: 1px solid #ecc6ce;";
+          const badgeStyle = isFavour
+            ? "background: #ccebda; color: #155724; border: 1px solid #a3d9bc;"
+            : "background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;";
+          const badgeText = isFavour ? "Favourable" : "Mindful";
+          const icon = item.icon || defaultIcons[idx] || "✨";
+          const rawTitle = item.title || item.name || `Item ${idx + 1}`;
+          const titleDisplay = rawTitle.match(/^\d+\./) ? rawTitle : `${idx + 1}. ${rawTitle}`;
+          const summaryText = item.summary || item.text || item.description || "";
+
+          return `
+            <div class="outlook-item-card ${statusClass}" style="${inlineStyle}">
+              <div class="outlook-item-header">
+                <div class="outlook-item-title">
+                  <span>${icon}</span>
+                  <span>${escapeHtml(titleDisplay)}</span>
+                </div>
+                <span class="outlook-item-badge" style="${badgeStyle}">
+                  ${badgeText}
+                </span>
+              </div>
+              <p class="outlook-item-summary">
+                ${escapeHtml(summaryText)}
+              </p>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
     document.getElementById("kundaliForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
@@ -1353,6 +1692,8 @@
           const anime = getAnimePlanetCharacterSVG(c.planet, 135);
           return `<div class="planet-clean-card" onclick="openPlanetRolePage('${c.planet}')">${anime.svg}<div class="p-name">${c.planet}</div></div>`;
         }).join("");
+
+        renderDailyOutlook(data);
 
       } finally {
         btn.textContent = "Generate Kundali";
