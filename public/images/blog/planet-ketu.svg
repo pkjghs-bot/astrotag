@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" width="100%" height="100%">
+  <defs>
+    
+    <filter id="wm-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#2a1d15" flood-opacity="0.12"/>
+    </filter>
+
+    
+              <radialGradient id="ketuGrad" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#fdba74"/>
+                <stop offset="50%" stop-color="#ea580c"/>
+                <stop offset="100%" stop-color="#7c2d12"/>
+              </radialGradient>
+            
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card Frame -->
+  <rect width="300" height="220" rx="12" fill="url(#cardGrad)" stroke="#e0d3c1" stroke-width="1.5"/>
+
+  <!-- Header Banner -->
+  <rect x="0" y="0" width="300" height="38" rx="12" fill="#c2410c" fill-opacity="0.1"/>
+  <rect x="0" y="26" width="300" height="12" fill="#c2410c" fill-opacity="0.1"/>
+  <line x1="0" y1="38" x2="300" y2="38" stroke="#c2410c" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Top Titles -->
+  <text x="14" y="24" font-family="'Cinzel', Georgia, serif" font-size="14" font-weight="800" fill="#9a3412">Ketu (South Node)</text>
+  <text x="210" y="24" font-family="'Noto Sans Devanagari', sans-serif" font-size="14" font-weight="700" fill="#9a3412">केतु</text>
+  <text x="282" y="24" font-family="sans-serif" font-size="16" font-weight="700" fill="#c2410c" text-anchor="end">☋</text>
+
+  <!-- Central Planet Graphic -->
+  
+              <!-- Spiritual Flame / Descending Node Comet -->
+              <circle cx="150" cy="100" r="38" fill="url(#ketuGrad)" stroke="#9a3412" stroke-width="2"/>
+              <!-- Dhwaja (Sacred Flag) & Moksha Flame motif -->
+              <path d="M136 122 L136 78 L164 90 L136 102" fill="#ffedd5" stroke="#fdba74" stroke-width="1.5"/>
+              <circle cx="150" cy="100" r="7" fill="#7c2d12"/>
+              <polygon points="150,95 153,100 150,105 147,100" fill="#fed7aa"/>
+              <!-- Comet tail aura -->
+              <path d="M136 124 C142 135 158 135 164 124" stroke="#fb923c" stroke-width="2" fill="none"/>
+            
+
+  <!-- Bottom Info Pills -->
+  <g transform="translate(14, 166)">
+    <rect x="0" y="0" width="168" height="18" rx="9" fill="#c2410c" fill-opacity="0.12"/>
+    <text x="84" y="12.5" font-family="sans-serif" font-size="9" font-weight="700" fill="#9a3412" text-anchor="middle">Shadow Node (Moksha Karaka)</text>
+
+    <rect x="0" y="22" width="168" height="18" rx="9" fill="#f1f5f9"/>
+    <text x="84" y="34.5" font-family="sans-serif" font-size="8.5" font-weight="600" fill="#475569" text-anchor="middle">Tuesday rule / Northeast &bull; Cat’s Eye (Lehsuniya)</text>
+  </g>
+
+  <!-- Brand Watermark in bottom right -->
+  
+  <!-- Astrotags Brand Watermark -->
+  <g class="astrotags-watermark" transform="translate(186, 192)">
+    <rect x="0" y="0" width="108" height="24" rx="12" fill="#ffffff" fill-opacity="0.94" stroke="#d4a359" stroke-width="0.9" filter="url(#wm-shadow)"/>
+    <g transform="translate(4, 3)">
+      <circle cx="9" cy="9" r="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+      <path d="M7.5 4.5 C5.5 5 4 6.8 4 8.5 C4 10.8 5.8 12.5 8 12.5 C9 12.5 10 12.1 10.6 11.5 C7.5 11.7 5.5 9.2 5.5 6.5 C5.5 5.8 5.7 5 6 4.5 Z" fill="#f59e0b"/>
+      <circle cx="9.5" cy="8.5" r="2.8" fill="#b84a14"/>
+      <polygon points="9.5,6.8 10,8 11.2,8.5 10,9 9.5,10.2 9,9 7.8,8.5 9,8" fill="#ffffff"/>
+    </g>
+    <text x="28" y="11.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#b84a14" letter-spacing="0.2">Astrotags</text>
+    <text x="28" y="18.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6" font-weight="600" fill="#7c5e42">astrotags.in</text>
+  </g>
+
+</svg>

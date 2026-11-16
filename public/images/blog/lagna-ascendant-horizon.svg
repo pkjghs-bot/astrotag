@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 390" width="100%" height="100%">
+  <defs>
+    
+    <filter id="wm-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#2a1d15" flood-opacity="0.12"/>
+    </filter>
+
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b2e"/>
+      <stop offset="45%" stop-color="#312e54"/>
+      <stop offset="70%" stop-color="#b45309"/>
+      <stop offset="85%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="30%" stop-color="#fde047"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="earthGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="50%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="600" height="390" rx="14" fill="#faf6f0" stroke="#e0d3c1" stroke-width="1.8"/>
+
+  <!-- Celestial dome -->
+  <g transform="translate(20, 20)">
+    <rect width="560" height="230" rx="10" fill="url(#skyGrad)"/>
+
+    <!-- Stars -->
+    <circle cx="80" cy="50" r="1.5" fill="#ffffff" opacity="0.8"/>
+    <circle cx="150" cy="35" r="1" fill="#ffffff" opacity="0.9"/>
+    <circle cx="240" cy="65" r="1.2" fill="#ffffff" opacity="0.7"/>
+    <circle cx="360" cy="40" r="1.5" fill="#ffffff" opacity="0.85"/>
+    <circle cx="480" cy="55" r="1" fill="#ffffff" opacity="0.75"/>
+    <circle cx="510" cy="25" r="1.8" fill="#ffffff" opacity="0.9"/>
+
+    <!-- Sunrise on Eastern Horizon -->
+    <circle cx="470" cy="180" r="55" fill="url(#sunGlow)"/>
+    <circle cx="470" cy="180" r="20" fill="#fef08a" stroke="#f59e0b" stroke-width="2"/>
+
+    <!-- Earth at center left -->
+    <circle cx="170" cy="180" r="75" fill="url(#earthGrad)"/>
+    <!-- Earth continents subtle -->
+    <path d="M140 145 C150 140 170 150 180 160 C190 170 185 190 160 200 C140 210 130 180 140 145 Z" fill="#22c55e" opacity="0.6"/>
+    <path d="M190 160 C205 155 220 170 215 190 C210 205 195 200 190 160 Z" fill="#16a34a" opacity="0.5"/>
+
+    <!-- Local Observer Pin -->
+    <circle cx="215" cy="125" r="5" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+    <text x="215" y="112" font-family="sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">Birth Place</text>
+
+    <!-- Horizon Line extending East -->
+    <line x1="140" y1="125" x2="520" y2="125" stroke="#fef08a" stroke-width="2" stroke-dasharray="6,4"/>
+    <polygon points="525,125 515,120 515,130" fill="#fef08a"/>
+    <text x="440" y="115" font-family="sans-serif" font-size="11" font-weight="700" fill="#fde047">EASTERN HORIZON</text>
+
+    <!-- Rising Sign Banner -->
+    <g transform="translate(370, 48)">
+      <rect x="0" y="0" width="180" height="52" rx="8" fill="#ffffff" fill-opacity="0.92" stroke="#d97706" stroke-width="1.2"/>
+      <text x="90" y="20" font-family="sans-serif" font-size="12" font-weight="800" fill="#b84a14" text-anchor="middle">LAGNA (ASCENDANT)</text>
+      <text x="90" y="35" font-family="sans-serif" font-size="10" font-weight="600" fill="#1e1b18" text-anchor="middle">Zodiac Sign Rising at Birth Moment</text>
+      <text x="90" y="47" font-family="sans-serif" font-size="9" fill="#6b5b4b" text-anchor="middle">Shifts 1 Sign every ~2 Hours</text>
+    </g>
+  </g>
+
+  <!-- Explanatory Comparison Below -->
+  <g transform="translate(30, 265)">
+    <!-- Lagna vs Sun vs Moon Cards -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="168" height="85" rx="8" fill="#fff9eb" stroke="#d97706" stroke-width="1.2"/>
+      <text x="84" y="20" font-family="sans-serif" font-size="12" font-weight="800" fill="#b84a14" text-anchor="middle">1. Lagna (Ascendant)</text>
+      <text x="84" y="38" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#451a03" text-anchor="middle">Body, Mind &amp; Life Path</text>
+      <text x="84" y="55" font-family="sans-serif" font-size="9.5" fill="#78350f" text-anchor="middle">Earth’s 24-hr rotation</text>
+      <text x="84" y="70" font-family="sans-serif" font-size="9.5" font-weight="700" fill="#b84a14" text-anchor="middle">Anchors H1 to H12</text>
+    </g>
+
+    <g transform="translate(186, 0)">
+      <rect x="0" y="0" width="168" height="85" rx="8" fill="#ffffff" stroke="#e0d3c1" stroke-width="1"/>
+      <text x="84" y="20" font-family="sans-serif" font-size="12" font-weight="700" fill="#1e1b18" text-anchor="middle">2. Moon Sign (Rashi)</text>
+      <text x="84" y="38" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#4a3b2c" text-anchor="middle">Emotions &amp; Psychology</text>
+      <text x="84" y="55" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Moon’s 28-day orbit</text>
+      <text x="84" y="70" font-family="sans-serif" font-size="9.5" font-weight="600" fill="#2563eb" text-anchor="middle">Changes every ~2.25 days</text>
+    </g>
+
+    <g transform="translate(372, 0)">
+      <rect x="0" y="0" width="168" height="85" rx="8" fill="#ffffff" stroke="#e0d3c1" stroke-width="1"/>
+      <text x="84" y="20" font-family="sans-serif" font-size="12" font-weight="700" fill="#1e1b18" text-anchor="middle">3. Sun Sign (Surya)</text>
+      <text x="84" y="38" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#4a3b2c" text-anchor="middle">Soul &amp; Core Vitality</text>
+      <text x="84" y="55" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Earth’s 365-day solar orbit</text>
+      <text x="84" y="70" font-family="sans-serif" font-size="9.5" font-weight="600" fill="#d97706" text-anchor="middle">Changes every ~30 days</text>
+    </g>
+  </g>
+
+  <!-- Watermark -->
+  
+  <!-- Astrotags Brand Watermark -->
+  <g class="astrotags-watermark" transform="translate(480, 356)">
+    <rect x="0" y="0" width="108" height="24" rx="12" fill="#ffffff" fill-opacity="0.94" stroke="#d4a359" stroke-width="0.9" filter="url(#wm-shadow)"/>
+    <g transform="translate(4, 3)">
+      <circle cx="9" cy="9" r="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+      <path d="M7.5 4.5 C5.5 5 4 6.8 4 8.5 C4 10.8 5.8 12.5 8 12.5 C9 12.5 10 12.1 10.6 11.5 C7.5 11.7 5.5 9.2 5.5 6.5 C5.5 5.8 5.7 5 6 4.5 Z" fill="#f59e0b"/>
+      <circle cx="9.5" cy="8.5" r="2.8" fill="#b84a14"/>
+      <polygon points="9.5,6.8 10,8 11.2,8.5 10,9 9.5,10.2 9,9 7.8,8.5 9,8" fill="#ffffff"/>
+    </g>
+    <text x="28" y="11.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#b84a14" letter-spacing="0.2">Astrotags</text>
+    <text x="28" y="18.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6" font-weight="600" fill="#7c5e42">astrotags.in</text>
+  </g>
+
+</svg>
