@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 680" width="100%" height="100%">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="318" viewBox="0 0 640 680">
   <defs>
     
     <filter id="wm-shadow" x="-10%" y="-10%" width="130%" height="130%">
@@ -45,58 +46,31 @@
   <!-- Outer Chart Frame -->
   <rect x="80" y="130" width="480" height="480" fill="#ffffff" stroke="#c2651a" stroke-width="2.5"/>
 
-  <!-- House Polygons (480x480 grid from 80,130) -->
-  <!-- H1 (Lagna): (320,130) (440,250) (320,370) (200,250) -->
+  <!-- House Polygons -->
   <polygon points="320,130 440,250 320,370 200,250" fill="url(#h1Grad)" stroke="#c2651a" stroke-width="1.8"/>
-
-  <!-- H2: (80,130) (320,130) (200,250) -->
   <polygon points="80,130 320,130 200,250" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H3: (80,130) (200,250) (80,250) -->
-  <!-- Note standard North Indian: Left side corner triangles split into H3 and H5 around H4 -->
-  <!-- H3: (80,130) (200,250) (80,370) -->
   <polygon points="80,130 200,250 80,370" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H4: (200,250) (320,370) (200,490) (80,370) -->
   <polygon points="200,250 320,370 200,490 80,370" fill="url(#kendraGrad)" stroke="#c2651a" stroke-width="1.8"/>
-
-  <!-- H5: (80,370) (200,490) (80,610) -->
   <polygon points="80,370 200,490 80,610" fill="url(#trikonaGrad)" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H6: (80,610) (200,490) (320,610) -->
   <polygon points="80,610 200,490 320,610" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H7: (320,370) (440,490) (320,610) (200,490) -->
   <polygon points="320,370 440,490 320,610 200,490" fill="url(#kendraGrad)" stroke="#c2651a" stroke-width="1.8"/>
-
-  <!-- H8: (320,610) (440,490) (560,610) -->
   <polygon points="320,610 440,490 560,610" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H9: (440,490) (560,370) (560,610) -->
   <polygon points="440,490 560,370 560,610" fill="url(#trikonaGrad)" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H10: (440,250) (560,370) (440,490) (320,370) -->
   <polygon points="440,250 560,370 440,490 320,370" fill="url(#kendraGrad)" stroke="#c2651a" stroke-width="1.8"/>
-
-  <!-- H11: (560,130) (560,370) (440,250) -->
   <polygon points="560,130 560,370 440,250" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
-
-  <!-- H12: (320,130) (560,130) (440,250) -->
   <polygon points="320,130 560,130 440,250" fill="#ffffff" stroke="#c2651a" stroke-width="1.5"/>
 
   <!-- Outer frame accents -->
   <rect x="83" y="133" width="474" height="474" fill="none" stroke="#d4a359" stroke-width="0.8"/>
 
   <!-- HOUSE LABELS AND THEMES -->
-  <!-- H1 -->
   <g transform="translate(320, 242)">
     <text x="0" y="-30" font-family="sans-serif" font-size="16" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 1 (LAGNA)</text>
-    <text x="0" y="-12" font-family="sans-serif" font-size="12" font-weight="700" fill="#431407" text-anchor="middle">Tanu Bhava &bull; Ascendant</text>
+    <text x="0" y="-12" font-family="sans-serif" font-size="12" font-weight="700" fill="#431407" text-anchor="middle">Tanu Bhava &#8226; Ascendant</text>
     <text x="0" y="6" font-family="sans-serif" font-size="11" font-weight="600" fill="#78350f" text-anchor="middle">Self, Physical Body &amp; Head</text>
     <text x="0" y="22" font-family="sans-serif" font-size="10.5" fill="#573a21" text-anchor="middle">Vitality, Personality, Life Path</text>
   </g>
 
-  <!-- H2 -->
   <g transform="translate(200, 180)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 2</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Dhana Bhava</text>
@@ -104,7 +78,6 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Liquid Assets &amp; Values</text>
   </g>
 
-  <!-- H3 -->
   <g transform="translate(130, 255)">
     <text x="0" y="-12" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 3</text>
     <text x="0" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Sahaja Bhava</text>
@@ -112,7 +85,6 @@
     <text x="0" y="34" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Short Trips &amp; Writing</text>
   </g>
 
-  <!-- H4 -->
   <g transform="translate(200, 370)">
     <text x="0" y="-22" font-family="sans-serif" font-size="13.5" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 4 (KENDRA)</text>
     <text x="0" y="-5" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Sukha Bhava</text>
@@ -120,7 +92,6 @@
     <text x="0" y="26" font-family="sans-serif" font-size="10" fill="#6b5b4b" text-anchor="middle">Vehicles &amp; Peace of Mind</text>
   </g>
 
-  <!-- H5 -->
   <g transform="translate(130, 490)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#047857" text-anchor="middle">HOUSE 5 (TRIKONA)</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Putra Bhava</text>
@@ -128,7 +99,6 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#4b5563" text-anchor="middle">Past-Life Merit (Purva Punya)</text>
   </g>
 
-  <!-- H6 -->
   <g transform="translate(200, 565)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 6</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Ripu / Roga Bhava</text>
@@ -136,7 +106,6 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Competitors &amp; Daily Routine</text>
   </g>
 
-  <!-- H7 -->
   <g transform="translate(320, 495)">
     <text x="0" y="-22" font-family="sans-serif" font-size="13.5" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 7 (KENDRA)</text>
     <text x="0" y="-5" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Kalatra Bhava</text>
@@ -144,7 +113,6 @@
     <text x="0" y="26" font-family="sans-serif" font-size="10" fill="#6b5b4b" text-anchor="middle">Contracts &amp; Public Dealings</text>
   </g>
 
-  <!-- H8 -->
   <g transform="translate(440, 565)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 8</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Randhra Bhava</text>
@@ -152,7 +120,6 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Transformation &amp; Occult</text>
   </g>
 
-  <!-- H9 -->
   <g transform="translate(510, 490)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#047857" text-anchor="middle">HOUSE 9 (TRIKONA)</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Dharma Bhava</text>
@@ -160,7 +127,6 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#4b5563" text-anchor="middle">Father, Pilgrimage &amp; Wisdom</text>
   </g>
 
-  <!-- H10 -->
   <g transform="translate(440, 370)">
     <text x="0" y="-22" font-family="sans-serif" font-size="13.5" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 10 (KENDRA)</text>
     <text x="0" y="-5" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Karma Bhava</text>
@@ -168,7 +134,6 @@
     <text x="0" y="26" font-family="sans-serif" font-size="10" fill="#6b5b4b" text-anchor="middle">Public Recognition &amp; Authority</text>
   </g>
 
-  <!-- H11 -->
   <g transform="translate(510, 255)">
     <text x="0" y="-12" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 11</text>
     <text x="0" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Labha Bhava</text>
@@ -176,7 +141,6 @@
     <text x="0" y="34" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Elder Siblings &amp; Network</text>
   </g>
 
-  <!-- H12 -->
   <g transform="translate(440, 180)">
     <text x="0" y="-14" font-family="sans-serif" font-size="13" font-weight="800" fill="#b84a14" text-anchor="middle">HOUSE 12</text>
     <text x="0" y="2" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e1b18" text-anchor="middle">Vyaya Bhava</text>
@@ -184,19 +148,18 @@
     <text x="0" y="32" font-family="sans-serif" font-size="9.5" fill="#6b5b4b" text-anchor="middle">Isolation, Sleep &amp; Moksha</text>
   </g>
 
-  <!-- Footer Brand Watermark -->
+  <!-- Watermark -->
   
   <!-- Astrotags Brand Watermark -->
-  <g class="astrotags-watermark" transform="translate(520, 644)">
-    <rect x="0" y="0" width="108" height="24" rx="12" fill="#ffffff" fill-opacity="0.94" stroke="#d4a359" stroke-width="0.9" filter="url(#wm-shadow)"/>
-    <g transform="translate(4, 3)">
+  <g class="astrotags-watermark" transform="translate(440, 638)">
+    <rect x="0" y="0" width="174" height="28" rx="14" fill="#ffffff" fill-opacity="0.95" stroke="#d4a359" stroke-width="1.08" filter="url(#wm-shadow)"/>
+    <g transform="translate(4.8, 3.5999999999999996) scale(1.2)">
       <circle cx="9" cy="9" r="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
       <path d="M7.5 4.5 C5.5 5 4 6.8 4 8.5 C4 10.8 5.8 12.5 8 12.5 C9 12.5 10 12.1 10.6 11.5 C7.5 11.7 5.5 9.2 5.5 6.5 C5.5 5.8 5.7 5 6 4.5 Z" fill="#f59e0b"/>
       <circle cx="9.5" cy="8.5" r="2.8" fill="#b84a14"/>
       <polygon points="9.5,6.8 10,8 11.2,8.5 10,9 9.5,10.2 9,9 7.8,8.5 9,8" fill="#ffffff"/>
     </g>
-    <text x="28" y="11.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#b84a14" letter-spacing="0.2">Astrotags</text>
-    <text x="28" y="18.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6" font-weight="600" fill="#7c5e42">astrotags.in</text>
+    <text x="31.2" y="18.599999999999998" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.6" font-weight="700" fill="#b84a14">Astrotags <tspan fill="#d4a359">&#8226;</tspan> <tspan font-weight="600" fill="#6b5b4b">astrotags.in</tspan></text>
   </g>
 
 </svg>
