@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Introduction to Vedic Kundali Houses &amp; Planetary Aspects — Astrotags</title>
+  <meta name="description" content="Interactive guide to the 12 houses (Bhavas), Ascendant (Lagna), and 1st-house planetary aspects (Drishti) in a North Indian Vedic Kundali chart." />
+  <link rel="canonical" href="https://astrotags.in/introduction" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23b84a14'/><path d='M14 6 A10 10 0 1 0 24 20 A8 8 0 1 1 14 6 Z' fill='%23fef08a'/><polygon points='18,10 19,13 22,14 19,15 18,18 17,15 14,14 17,13' fill='%23fff'/></svg>" />
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1759950441638397" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --primary: #b84a14;
+      --primary-dark: #8f360a;
+      --bg: #faf6f0;
+      --card: #ffffff;
+      --border: #e0d3c1;
+      --text: #2a1d15;
+      --text-muted: #6b5b4b;
+      --highlight: #fde6d8;
+      --aspect-fill: #fef3c7;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 14px 16px 40px;
+      line-height: 1.55;
+    }
+    .container { max-width: 980px; margin: 0 auto; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 16px;
+      font-size: 0.95rem;
+    }
+    nav a:hover, nav a.active { color: var(--primary); text-decoration: underline; }
+    h1 { font-size: 1.55rem; margin: 0 0 6px; color: var(--text); }
+    h2 { font-size: 1.25rem; margin: 0 0 10px; color: var(--primary-dark); }
+    .subtitle { color: var(--text-muted); margin: 0 0 20px; font-size: 0.96rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 3px rgba(42, 29, 21, 0.04);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 760px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .chart-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    svg.kundali {
+      width: 100%;
+      max-width: 360px;
+      height: auto;
+      background: #fffdf9;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      user-select: none;
+    }
+    .house-poly {
+      fill: #fffdf9;
+      stroke: var(--primary);
+      stroke-width: 1.5;
+      cursor: pointer;
+      transition: fill 0.15s ease;
+    }
+    .house-poly:hover { fill: #fff1e6; }
+    .house-poly.selected { fill: var(--highlight); }
+    .house-poly.aspected { fill: var(--aspect-fill); }
+    .house-num {
+      font-size: 12px;
+      font-weight: 700;
+      fill: var(--primary-dark);
+      pointer-events: none;
+      text-anchor: middle;
+    }
+    .house-tag {
+      font-size: 10px;
+      fill: var(--text-muted);
+      pointer-events: none;
+      text-anchor: middle;
+    }
+    .planet-badge-svg {
+      font-size: 12px;
+      font-weight: 700;
+      fill: #8f360a;
+      pointer-events: none;
+      text-anchor: middle;
+    }
+    .info-box {
+      background: #fffaf4;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .badge.secondary {
+      background: #e9d8c4;
+      color: var(--text);
+      margin-left: 6px;
+    }
+    .planet-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    ul.clean { margin: 8px 0 0; padding-left: 18px; }
+    ul.clean li { margin-bottom: 6px; }
+    .legend {
+      display: flex;
+      gap: 14px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--primary);
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 28px;
+    }
+    footer a { color: var(--primary); text-decoration: none; margin: 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="brand" href="/">Astrotags — Vedic Kundali</a>
+      <nav>
+        <a href="/">Kundali Calculator</a>
+        <a class="active" href="/introduction">Introduction</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <h1>Introduction to the Vedic Kundali Chart</h1>
+    <p class="subtitle">Click any house in the North Indian diamond chart to explore what it governs and see how the Ascendant (Lagna) anchors the entire horoscope.</p>
+
+    <!-- SECTION 1: 12 HOUSES & ASCENDANT -->
+    <section class="card">
+      <h2>1. The 12 Houses (Bhavas) &amp; The Ascendant (Lagna)</h2>
+      <div class="grid-2">
+        <div class="chart-wrap">
+          <svg id="houseChart" class="kundali" viewBox="0 0 320 320" aria-label="Interactive North Indian Kundali 12 Houses Chart"></svg>
+          <div class="legend">
+            <span><span class="swatch" style="background:#fde6d8;"></span>Selected House</span>
+            <span><strong>H1</strong> = Ascendant (Lagna)</span>
+          </div>
+        </div>
+        <div class="info-box" id="houseDetail"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: PLANETS IN 1ST HOUSE & THEIR ASPECTS -->
+    <section class="card">
+      <h2>2. Planets Placed in the 1st House (Ascendant) &amp; Their Aspects (Drishti)</h2>
+      <p class="subtitle" style="margin-bottom:12px;">In Vedic astrology, every planet aspects the <strong>7th house</strong> directly opposite it, while Mars, Jupiter, Saturn, Rahu, and Ketu also cast special aspects. Select a planet below to place it in the <strong>1st House</strong> and inspect every house it influences.</p>
+
+      <div class="planet-pills" id="planetPills"></div>
+
+      <div class="grid-2">
+        <div class="chart-wrap">
+          <svg id="aspectChart" class="kundali" viewBox="0 0 320 320" aria-label="1st House Planetary Aspects Chart"></svg>
+          <div class="legend">
+            <span><span class="swatch" style="background:#fde6d8;"></span>1st House (Planet Placed)</span>
+            <span><span class="swatch" style="background:#fef3c7;"></span>Aspected Houses</span>
+          </div>
+        </div>
+        <div class="info-box" id="aspectDetail"></div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="/">Home</a> |
+      <a href="/introduction">Introduction</a> |
+      <a href="/about.html">About</a> |
+      <a href="/contact.html">Contact</a>
+    </footer>
+  </div>
+
+  <script>
+    // North Indian diamond coordinates for Houses 1 to 12 on a 320x320 grid
+    const HOUSES_GEOM = [
+      { num: 1,  points: "160,0 240,80 160,160 80,80",     lx: 160, ly: 76,  tag: "Lagna / Asc" },
+      { num: 2,  points: "0,0 160,0 80,80",               lx: 80,  ly: 34,  tag: "Dhana" },
+      { num: 3,  points: "0,0 80,80 0,160",               lx: 32,  ly: 84,  tag: "Sahaja" },
+      { num: 4,  points: "80,80 160,160 80,240 0,160",    lx: 80,  ly: 164, tag: "Sukha" },
+      { num: 5,  points: "0,160 80,240 0,320",            lx: 32,  ly: 244, tag: "Putra" },
+      { num: 6,  points: "0,320 80,240 160,320",          lx: 80,  ly: 292, tag: "Ripu" },
+      { num: 7,  points: "160,160 240,240 160,320 80,240",lx: 160, ly: 244, tag: "Kalatra" },
+      { num: 8,  points: "160,320 240,240 320,320",       lx: 240, ly: 292, tag: "Randhra" },
+      { num: 9,  points: "240,240 320,160 320,320",       lx: 288, ly: 244, tag: "Dharma" },
+      { num: 10, points: "240,80 320,160 240,240 160,160",lx: 240, ly: 164, tag: "Karma" },
+      { num: 11, points: "320,0 320,160 240,80",          lx: 288, ly: 84,  tag: "Labha" },
+      { num: 12, points: "160,0 320,0 240,80",            lx: 240, ly: 34,  tag: "Vyaya" }
+    ];
+
+    const HOUSE_DATA = {
+      1:  { name: "1st House — Tanu Bhava (The Ascendant / Lagna)", role: "Self, Physical Body, Vitality & Life Path", ascNote: "This top-center diamond IS the Ascendant (Lagna). It marks the exact zodiac sign rising on the eastern horizon at your birth moment and sets the numbering of all other 11 houses.", governs: ["Physical constitution, appearance, and overall immunity", "Core personality, temperament, and self-expression", "Early childhood environment and general life direction"] },
+      2:  { name: "2nd House — Dhana Bhava", role: "Wealth, Family, Speech & Values", ascNote: "2nd from the Ascendant (Lagna). Shows the resources and family lineage supporting the native.", governs: ["Accumulated wealth, savings, and liquid assets", "Speech, voice quality, and early education", "Immediate family, food habits, and face/eyes"] },
+      3:  { name: "3rd House — Sahaja Bhava", role: "Courage, Siblings, Effort & Communication", ascNote: "3rd from the Ascendant (Lagna). Measures personal willpower and self-initiated effort.", governs: ["Courage, initiative, and mental grit", "Younger siblings, neighbors, and short journeys", "Writing, media, hands, and practical skills"] },
+      4:  { name: "4th House — Sukha Bhava", role: "Mother, Home, Peace of Mind & Property", ascNote: "4th from the Ascendant (Lagna) — one of the four foundational Kendra pillars.", governs: ["Mother, maternal nurturing, and emotional security", "Home, real estate, land, and vehicles", "Foundational academic degrees and inner happiness"] },
+      5:  { name: "5th House — Putra Bhava", role: "Intelligence, Children, Creativity & Purva Punya", ascNote: "5th from the Ascendant (Lagna) — a primary Dharma Trikona (trine) house.", governs: ["Children, progeny, and creative output", "Analytical intelligence, mantra, and speculative skill", "Past-life merit (Purva Punya) and romance"] },
+      6:  { name: "6th House — Ripu / Roga Bhava", role: "Health Challenges, Service, Debt & Competition", ascNote: "6th from the Ascendant (Lagna) — an Upachaya (growth-through-effort) house.", governs: ["Daily work routine, service, and subordinates", "Acute illnesses, digestion, and healing capacity", "Debts, legal disputes, and overcoming competitors"] },
+      7:  { name: "7th House — Kalatra Bhava", role: "Marriage, Partnerships & Public Dealings", ascNote: "7th from the Ascendant (Lagna) — directly opposite the 1st house on the horizon.", governs: ["Spouse, marriage, and long-term committed relationships", "Business partnerships, contracts, and trade", "Public image and interactions with the outer world"] },
+      8:  { name: "8th House — Randhra Bhava", role: "Longevity, Transformation & Hidden Knowledge", ascNote: "8th from the Ascendant (Lagna). Governs sudden shifts and deep psychological renewal.", governs: ["Longevity, chronic ailments, and major life transitions", "Inheritance, joint finances, insurance, and taxes", "Occult sciences, astrology, research, and mysteries"] },
+      9:  { name: "9th House — Dharma Bhava", role: "Fortune, Higher Wisdom, Father & Pilgrimage", ascNote: "9th from the Ascendant (Lagna) — the highest Dharma Trikona (trine) house.", governs: ["Dharma, ethics, philosophy, and spiritual teachers (Guru)", "Father, mentors, and higher university education", "Long-distance travel, pilgrimage, and grace/fortune"] },
+      10: { name: "10th House — Karma Bhava", role: "Career, Authority, Status & Public Action", ascNote: "10th from the Ascendant (Lagna) — the zenith Kendra pillar of worldly achievement.", governs: ["Profession, vocation, and career accomplishments", "Social status, reputation, and leadership authority", "Karmic duties and contribution to society"] },
+      11: { name: "11th House — Labha Bhava", role: "Gains, Income, Networks & Fulfillment of Desires", ascNote: "11th from the Ascendant (Lagna) — the strongest Upachaya house of material gains.", governs: ["Regular income, profits, and financial inflows", "Elder siblings, social circles, and influential allies", "Realization of long-term ambitions and aspirations"] },
+      12: { name: "12th House — Vyaya Bhava", role: "Expenditure, Liberation (Moksha) & Foreign Lands", ascNote: "12th from the Ascendant (Lagna). Completes the 12-house cycle of material and spiritual release.", governs: ["Expenses, charity, donations, and financial outflow", "Foreign residence, isolation, retreats, and sleep", "Spiritual liberation (Moksha) and subconscious surrender"] }
+    };
+
+    const PLANET_ASPECTS = [
+      {
+        id: "sun", name: "Sun (Surya)", short: "Su",
+        summary: "When the Sun occupies the 1st House (Ascendant), it bestows strong self-respect, leadership presence, and vitality, while casting its full 7th-house aspect across the chart.",
+        aspects: [
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Directly illuminates the 7th house of marriage and partnerships. Brings a proud, authoritative, or prominent spouse, and requires balancing personal ego with mutual compromise in relationships and business dealings." }
+        ]
+      },
+      {
+        id: "moon", name: "Moon (Chandra)", short: "Mo",
+        summary: "In the 1st House, the Moon makes the native emotionally perceptive, empathetic, and responsive to their environment, casting a nurturing 7th-house aspect.",
+        aspects: [
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Aspects the 7th house of partnerships, fostering emotional bonding, public popularity, and sensitivity toward one's spouse and close collaborators." }
+        ]
+      },
+      {
+        id: "mars", name: "Mars (Mangala)", short: "Ma",
+        summary: "Mars in the 1st House creates high physical drive, courage, and directness (and forms Manglik placement), casting three powerful aspects across the chart.",
+        aspects: [
+          { house: 4, type: "4th Special Aspect", detail: "Directs fiery energy toward the 4th house of home, mother, and property—driving real-estate acquisition while requiring patience in domestic life." },
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Aspects the 7th house of marriage and business partnerships, bringing passion and decisiveness alongside a need to manage friction or impatience with partners." },
+          { house: 8, type: "8th Special Aspect", detail: "Influences the 8th house of transformation and shared resources, sharpening investigative instincts, resilience during crises, and surgical/technical focus." }
+        ]
+      },
+      {
+        id: "mercury", name: "Mercury (Budha)", short: "Me",
+        summary: "Mercury gains directional strength (Dig Bala) in the 1st House, sharpening intellect, wit, and communication while aspecting the 7th house.",
+        aspects: [
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Aspects the 7th house of partnerships and trade, favoring articulate, intellectually compatible partners and strong negotiation skills in business." }
+        ]
+      },
+      {
+        id: "jupiter", name: "Jupiter (Guru)", short: "Ju",
+        summary: "Jupiter also gains directional strength (Dig Bala) in the 1st House, imparting wisdom, optimism, and ethical stature while blessing three trine/angle houses.",
+        aspects: [
+          { house: 5, type: "5th Special Aspect", detail: "Protects and expands the 5th house of intelligence, children, mantra, and creative judgment—considered one of the most auspicious blessings in a Kundali." },
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Blesses the 7th house of marriage and partnerships with harmony, loyalty, and fair-minded business alliances." },
+          { house: 9, type: "9th Special Aspect", detail: "Strengthens the 9th house of Dharma, father, mentors, and higher learning, reinforcing fortune and spiritual guidance." }
+        ]
+      },
+      {
+        id: "venus", name: "Venus (Shukra)", short: "Ve",
+        summary: "Venus in the 1st House enhances charm, aesthetic taste, diplomacy, and artistic inclination while casting its full aspect on the 7th house.",
+        aspects: [
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Directly aspects the 7th house of marriage and partnerships, encouraging romance, refined social relationships, and harmonious business collaborations." }
+        ]
+      },
+      {
+        id: "saturn", name: "Saturn (Shani)", short: "Sa",
+        summary: "Saturn in the 1st House builds discipline, endurance, and a serious, pragmatic outlook, casting three structured aspects that demand responsibility.",
+        aspects: [
+          { house: 3, type: "3rd Special Aspect", detail: "Aspects the 3rd house of courage and communication, making effort deliberate, methodical, and persistent rather than impulsive." },
+          { house: 7, type: "7th Aspect (Full Drishti)", detail: "Aspects the 7th house of marriage and contracts, favoring mature, committed, and long-lasting partnerships (sometimes delaying marriage until stability is built)." },
+          { house: 10, type: "10th Special Aspect", detail: "Reinforces the 10th house of career and karma, rewarding steady hard work, organizational authority, and long-term professional rise." }
+        ]
+      },
+      {
+        id: "rahu", name: "Rahu (North Node)", short: "Ra",
+        summary: "Rahu in the 1st House amplifies ambition, unconventional thinking, and hunger for self-reinvention, projecting nodal aspects onto the 5th, 7th, and 9th houses.",
+        aspects: [
+          { house: 5, type: "5th Nodal Aspect", detail: "Stimulates the 5th house with out-of-the-box creativity, technical/analytical innovation, and intense focus on speculative or intellectual pursuits." },
+          { house: 7, type: "7th Nodal Aspect", detail: "Influences the 7th house of partnerships, often attracting unconventional, cross-cultural, or ambitious alliances in marriage and business." },
+          { house: 9, type: "9th Nodal Aspect", detail: "Challenges traditional dogma in the 9th house, encouraging independent philosophy, foreign travel, and self-defined belief systems." }
+        ]
+      },
+      {
+        id: "ketu", name: "Ketu (South Node)", short: "Ke",
+        summary: "Ketu in the 1st House grants sharp intuition, spiritual detachment, and introspective depth, projecting subtle nodal aspects onto the 5th, 7th, and 9th houses.",
+        aspects: [
+          { house: 5, type: "5th Nodal Aspect", detail: "Deepens intuitive insight, research ability, and spiritual/mantra inclination in the 5th house while detaching from superficial recognition." },
+          { house: 7, type: "7th Nodal Aspect", detail: "Brings karmic lessons and a need for personal space and spiritual alignment within 7th-house marriage and partnerships." },
+          { house: 9, type: "9th Nodal Aspect", detail: "Directs the 9th house toward inner philosophical inquiry, moksha-oriented wisdom, and detachment from rigid orthodoxy." }
+        ]
+      }
+    ];
+
+    function renderChart(svgEl, options) {
+      svgEl.innerHTML = "";
+      HOUSES_GEOM.forEach(h => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        poly.setAttribute("points", h.points);
+        poly.setAttribute("class", "house-poly");
+        if (options.selectedHouse === h.num) poly.classList.add("selected");
+        if (options.aspectedHouses && options.aspectedHouses.includes(h.num)) poly.classList.add("aspected");
+        if (options.onHouseClick) {
+          poly.addEventListener("click", () => options.onHouseClick(h.num));
+        }
+
+        const numTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        numTxt.setAttribute("x", h.lx);
+        numTxt.setAttribute("y", h.ly);
+        numTxt.setAttribute("class", "house-num");
+        numTxt.textContent = "H" + h.num;
+
+        const tagTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tagTxt.setAttribute("x", h.lx);
+        tagTxt.setAttribute("y", h.ly + 13);
+        tagTxt.setAttribute("class", "house-tag");
+        tagTxt.textContent = (options.aspectedHouses && options.aspectedHouses.includes(h.num)) ? "Aspected" : h.tag;
+
+        g.appendChild(poly);
+        g.appendChild(numTxt);
+        g.appendChild(tagTxt);
+
+        if (h.num === 1 && options.firstHousePlanet) {
+          const pTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          pTxt.setAttribute("x", h.lx);
+          pTxt.setAttribute("y", h.ly + 28);
+          pTxt.setAttribute("class", "planet-badge-svg");
+          pTxt.textContent = "[" + options.firstHousePlanet + "]";
+          g.appendChild(pTxt);
+        }
+
+        svgEl.appendChild(g);
+      });
+    }
+
+    // Section 1 state
+    let selectedHouse = 1;
+    const houseChartEl = document.getElementById("houseChart");
+    const houseDetailEl = document.getElementById("houseDetail");
+
+    function updateHouseSection(num) {
+      selectedHouse = num;
+      renderChart(houseChartEl, {
+        selectedHouse: num,
+        onHouseClick: updateHouseSection
+      });
+      const d = HOUSE_DATA[num];
+      houseDetailEl.innerHTML = `
+        <span class="badge">House ${num}</span>
+        ${num === 1 ? '<span class="badge secondary">Ascendant (Lagna)</span>' : '<span class="badge secondary">Anchored from H1 Ascendant</span>'}
+        <h3 style="margin:6px 0 4px;font-size:1.12rem;">${d.name}</h3>
+        <p style="margin:0 0 10px;font-weight:600;color:var(--primary-dark);">${d.role}</p>
+        <p style="margin:0 0 10px;font-size:0.93rem;"><strong>Relation to Ascendant:</strong> ${d.ascNote}</p>
+        <strong style="font-size:0.93rem;">Key Areas Governed:</strong>
+        <ul class="clean">
+          ${d.governs.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+      `;
+    }
+
+    // Section 2 state
+    let selectedPlanetId = "sun";
+    const aspectChartEl = document.getElementById("aspectChart");
+    const aspectDetailEl = document.getElementById("aspectDetail");
+    const planetPillsEl = document.getElementById("planetPills");
+
+    function updateAspectSection(planetId) {
+      selectedPlanetId = planetId;
+      const planet = PLANET_ASPECTS.find(p => p.id === planetId);
+      const aspectedHouses = planet.aspects.map(a => a.house);
+
+      Array.from(planetPillsEl.children).forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.id === planetId);
+      });
+
+      renderChart(aspectChartEl, {
+        selectedHouse: 1,
+        aspectedHouses: aspectedHouses,
+        firstHousePlanet: planet.short
+      });
+
+      aspectDetailEl.innerHTML = `
+        <span class="badge">${planet.name} in 1st House (Ascendant)</span>
+        <span class="badge secondary">Aspects: ${aspectedHouses.map(h => "H" + h).join(", ")}</span>
+        <p style="margin:8px 0 12px;font-size:0.95rem;">${planet.summary}</p>
+        <strong style="font-size:0.94rem;">Planetary Aspects (Drishti) from the 1st House:</strong>
+        <ul class="clean">
+          ${planet.aspects.map(a => `<li><strong>House ${a.house} (${a.type}):</strong> ${a.detail}</li>`).join("")}
+        </ul>
+      `;
+    }
+
+    PLANET_ASPECTS.forEach(p => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pill";
+      btn.dataset.id = p.id;
+      btn.textContent = p.name;
+      btn.addEventListener("click", () => updateAspectSection(p.id));
+      planetPillsEl.appendChild(btn);
+    });
+
+    updateHouseSection(1);
+    updateAspectSection("sun");
+  </script>
+</body>
+</html>
